@@ -28,12 +28,13 @@ class WatchCreate(BaseModel):
 
 
 class WatchUpdate(BaseModel):
-    """Edicao parcial. O EAN e a chave natural e nao muda por aqui."""
+    """Edicao parcial. Trocar o EAN so e permitido em relogio sem historico (ver service)."""
 
     model_config = ConfigDict(extra="forbid")
 
     marca: Texto | None = None
     referencia_fabricante: Texto | None = None
+    ean: Ean | None = None
     tipo_movimento: TipoMovimento | None = None
     tamanho_caixa_mm: Milimetros | None = None
     preco_alvo: Dinheiro | None = None

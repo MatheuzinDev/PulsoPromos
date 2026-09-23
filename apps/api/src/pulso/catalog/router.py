@@ -67,6 +67,12 @@ def editar_relogio(watch_id: int, data: WatchUpdate, session: SessionDep) -> Wat
     return WatchOut.model_validate(service.update_watch(session, watch_id, data))
 
 
+@router.delete("/{watch_id}", status_code=204)
+def excluir_relogio(watch_id: int, session: SessionDep) -> Response:
+    service.delete_watch(session, watch_id)
+    return Response(status_code=204)
+
+
 @router.post("/{watch_id}/pausar", response_model=WatchOut)
 def pausar_vigilancia(watch_id: int, session: SessionDep) -> WatchOut:
     return WatchOut.model_validate(service.set_vigilancia(session, watch_id, False))

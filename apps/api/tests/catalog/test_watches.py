@@ -95,10 +95,9 @@ def test_editar_permite_limpar_preco_alvo(client: TestClient) -> None:
     assert response.json()["preco_alvo"] is None
 
 
-def test_editar_nao_aceita_ean_nem_nulo_em_campo_obrigatorio(client: TestClient) -> None:
+def test_editar_rejeita_nulo_em_campo_obrigatorio(client: TestClient) -> None:
     watch = criar(client)
     url = f"/watches/{watch['id']}"
-    assert client.patch(url, json={"ean": "7890000000099"}).status_code == 422
     assert client.patch(url, json={"marca": None}).status_code == 422
 
 

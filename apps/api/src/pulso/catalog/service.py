@@ -1,10 +1,10 @@
-from sqlalchemy import func, select
+from sqlalchemy import delete, func, or_, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from pulso.catalog.errors import ConflictError, NotFoundError
 from pulso.catalog.schemas import ListingCreate, WatchCreate, WatchUpdate
-from pulso.models import Listing, Watch
+from pulso.models import Listing, PriceReading, Publication, Watch
 
 
 def _get_watch(session: Session, watch_id: int) -> Watch:
@@ -52,13 +52,69 @@ def get_watch(session: Session, watch_id: int) -> Watch:
     return _get_watch(session, watch_id)
 
 
+def _guard_sem_historico(session: Session, watch: Watch, operacao: str) -> None:
+    """Recusa (409) se o relogio ja tem leituras de preco ou publicacoes (RF30, RNF09, RNF12)."""
+    leituras = (
+        session.scalar(
+            select(func.count())
+            .select_from(PriceReading)
+            .join(Listing, Listing.id == PriceReading.listing_id)
+            .where(Listing.watch_id == watch.id)
+        )
+        or 0
+    )
+    publicacoes = (
+        session.scalar(
+            select(func.count())
+            .select_from(Publication)
+            .where(
+                or_(
+                    Publication.watch_id == watch.id,
+                    Publication.listing_id.in_(
+                        select(Listing.id).where(Listing.watch_id == watch.id)
+                    ),
+                )
+            )
+        )
+        or 0
+    )
+    if leituras or publicacoes:
+        raise ConflictError(
+            f"Nao e possivel {operacao} (relogio {watch.id}): ele ja tem historico. "
+            f"Leituras de preco: {leituras}; publicacoes: {publicacoes}. "
+            "Esses registros sao mantidos para auditoria e nao podem ser apagados; "
+            "para tirar o relogio de circulacao, pause a vigilancia."
+        )
+
+
 def update_watch(session: Session, watch_id: int, data: WatchUpdate) -> Watch:
     watch = _get_watch(session, watch_id)
-    for campo, valor in data.model_dump(exclude_unset=True).items():
-        setattr(watch, campo, valor)
+    campos = data.model_dump(exclude_unset=True)
+    novo_ean = campos.get("ean")
+    if novo_ean is not None and novo_ean != watch.ean:
+        _guard_sem_historico(session, watch, "trocar o EAN do relogio")
+        mensagem = f"Ja existe um relogio com o EAN {novo_ean}"
+        if session.scalar(select(Watch.id).where(Watch.ean == novo_ean)) is not None:
+            raise ConflictError(mensagem)
+    try:
+        with session.begin_nested():
+            for campo, valor in campos.items():
+                setattr(watch, campo, valor)
+    except IntegrityError:
+        # corrida entre dois relogios com o mesmo EAN: o indice unico decide
+        raise ConflictError(f"Ja existe um relogio com o EAN {novo_ean}") from None
     session.commit()
     session.refresh(watch)
     return watch
+
+
+def delete_watch(session: Session, watch_id: int) -> None:
+    """Remove o relogio e os anuncios dele. Nunca toca em price_reading nem publication."""
+    watch = _get_watch(session, watch_id)
+    _guard_sem_historico(session, watch, "excluir o relogio")
+    session.execute(delete(Listing).where(Listing.watch_id == watch.id))
+    session.delete(watch)
+    session.commit()
 
 
 def set_vigilancia(session: Session, watch_id: int, ativa: bool) -> Watch:
