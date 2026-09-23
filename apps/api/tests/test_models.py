@@ -2,6 +2,7 @@ from datetime import UTC, datetime
 from decimal import Decimal
 
 import pytest
+from sqlalchemy import text
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
@@ -162,3 +163,78 @@ def test_unique_listing_coletado_em_rejeita_leitura_duplicada(db_session: Sessio
     with pytest.raises(IntegrityError):
         db_session.flush()
     db_session.rollback()
+
+
+def test_server_defaults_aplicados_no_nivel_do_banco(db_session: Session) -> None:
+    watch = make_watch(ean="7893333333337")
+    db_session.add(watch)
+    db_session.commit()
+
+    db_session.execute(
+        text(
+            """
+            INSERT INTO listing (watch_id, marketplace, marketplace_item_id, url)
+            VALUES (:watch_id, :marketplace, :marketplace_item_id, :url)
+            """
+        ),
+        {
+            "watch_id": watch.id,
+            "marketplace": "shopee",
+            "marketplace_item_id": "item-sql-insert",
+            "url": "https://shopee.com.br/item-sql",
+        },
+    )
+    db_session.commit()
+
+    listing = db_session.query(Listing).filter_by(marketplace_item_id="item-sql-insert").one()
+    assert listing.ativo is True
+
+    coletado_em = datetime.now(UTC)
+    db_session.execute(
+        text(
+            """
+            INSERT INTO price_reading
+            (listing_id, coletado_em, preco_vista, em_estoque, vendedor_raw, origem)
+            VALUES (:listing_id, :coletado_em, :preco_vista, :em_estoque, :vendedor_raw, :origem)
+            """
+        ),
+        {
+            "listing_id": listing.id,
+            "coletado_em": coletado_em,
+            "preco_vista": Decimal("100.00"),
+            "em_estoque": True,
+            "vendedor_raw": '{"loja": "Teste"}',
+            "origem": "test-adapter",
+        },
+    )
+    db_session.commit()
+
+    reading = (
+        db_session.query(PriceReading)
+        .filter_by(listing_id=listing.id)
+        .one()
+    )
+    assert reading.moeda == "BRL"
+    assert reading.desatualizado is False
+
+    db_session.execute(
+        text(
+            """
+            INSERT INTO watch (marca, referencia_fabricante, ean, tipo_movimento, tamanho_caixa_mm)
+            VALUES (:marca, :referencia_fabricante, :ean, :tipo_movimento, :tamanho_caixa_mm)
+            """
+        ),
+        {
+            "marca": "Citizen",
+            "referencia_fabricante": "NH8350",
+            "ean": "7894444444444",
+            "tipo_movimento": "quartzo",
+            "tamanho_caixa_mm": Decimal("42.0"),
+        },
+    )
+    db_session.commit()
+
+    watch2 = db_session.query(Watch).filter_by(ean="7894444444444").one()
+    assert watch2.vigilancia_ativa is True
+    assert watch2.exige_loja_oficial is False
+    assert watch2.exige_reputacao_minima is False
