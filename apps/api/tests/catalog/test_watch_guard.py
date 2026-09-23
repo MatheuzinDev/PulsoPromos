@@ -2,11 +2,15 @@ from datetime import UTC, datetime
 from decimal import Decimal
 from typing import Any
 
+import pytest
 from fastapi.testclient import TestClient
-from helpers import criar
+from helpers import criar, payload
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
+from pulso.catalog import service
+from pulso.catalog.errors import ConflictError
+from pulso.catalog.schemas import WatchCreate, WatchUpdate
 from pulso.models import Listing, PriceReading, Publication, Watch
 
 
@@ -154,3 +158,16 @@ def test_delete_bloqueado_com_publication(client: TestClient, db_session: Sessio
     assert "publicacoes: 1" in response.json()["detail"]
     assert _contagens(db_session) == antes == (1, 1, 0, 1)
     assert client.get(f"/watches/{watch['id']}").status_code == 200
+
+
+def test_violacao_que_nao_e_de_ean_nao_fala_em_ean(db_session: Session) -> None:
+    """(C) o except de update_watch nao pode atribuir ao EAN uma violacao de outra restricao."""
+    watch = service.create_watch(db_session, WatchCreate(**payload()))
+    # model_construct pula o Pydantic, que hoje barraria o valor antes do banco
+    invalido = WatchUpdate.model_construct(
+        _fields_set={"tipo_movimento"}, tipo_movimento="relogio-de-sol"
+    )
+    with pytest.raises(ConflictError) as exc:
+        service.update_watch(db_session, watch.id, invalido)
+    assert "EAN" not in exc.value.mensagem
+    assert "ck_watch_tipo_movimento" in exc.value.mensagem

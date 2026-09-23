@@ -1,5 +1,6 @@
+from psycopg import errors as pg_errors
 from sqlalchemy import delete, func, or_, select
-from sqlalchemy.exc import IntegrityError
+from sqlalchemy.exc import IntegrityError, OperationalError
 from sqlalchemy.orm import Session
 
 from pulso.catalog.errors import ConflictError, NotFoundError
@@ -87,22 +88,90 @@ def _guard_sem_historico(session: Session, watch: Watch, operacao: str) -> None:
         )
 
 
+def _travar_relogio(session: Session, watch_id: int) -> Watch:
+    """SELECT ... FOR UPDATE na linha do relogio.
+
+    Um INSERT em listing ou publication toma FOR KEY SHARE nesta linha (FK), e so FOR UPDATE
+    conflita com FOR KEY SHARE: FOR NO KEY UPDATE deixaria um anuncio novo aparecer.
+    Espera sem risco de deadlock porque e o primeiro lock de linha da transacao.
+    """
+    watch = session.scalar(
+        select(Watch)
+        .where(Watch.id == watch_id)
+        .with_for_update()
+        .execution_options(populate_existing=True)
+    )
+    if watch is None:
+        # tambem cobre o relogio excluido por outra transacao enquanto esperavamos o lock
+        raise NotFoundError(f"Relogio {watch_id} nao encontrado")
+    return watch
+
+
+def _travar_anuncios(session: Session, watch: Watch, operacao: str) -> None:
+    """SELECT ... FOR UPDATE NOWAIT nos anuncios do relogio, em ordem de id.
+
+    Um INSERT em price_reading toma FOR KEY SHARE no listing (FK); travar so o relogio nao o
+    impediria. NOWAIT, e nao espera: quem grava historico pode travar listing antes de watch
+    (o INSERT em publication faz isso, pela ordem dos triggers de FK), e esperar aqui formaria
+    um ciclo. Anuncio ocupado e duvida, e duvida vira 409.
+    """
+    try:
+        with session.begin_nested():
+            session.execute(
+                select(Listing.id)
+                .where(Listing.watch_id == watch.id)
+                .order_by(Listing.id)
+                .with_for_update(nowait=True)
+            )
+    except OperationalError as exc:
+        if not isinstance(exc.orig, pg_errors.LockNotAvailable):
+            raise
+        raise ConflictError(
+            f"Nao e possivel {operacao} (relogio {watch.id}): um anuncio dele esta recebendo "
+            "historico ou sendo alterado neste momento. Tente novamente em instantes."
+        ) from None
+
+
+def _travar_sem_historico(session: Session, watch_id: int, operacao: str) -> Watch:
+    """Trava relogio e anuncios e so entao aplica a guarda (RF30, RNF09, RNF12).
+
+    Com os locks tomados, nenhum price_reading, publication ou listing novo do relogio pode ser
+    gravado ate o fim da transacao, e a guarda enxerga tudo o que ja foi commitado. Isso depende
+    de READ COMMITTED (o padrao): cada comando le um snapshot novo, tirado depois dos locks.
+    Ordem de lock: watch (espera) -> listings por id (NOWAIT).
+    """
+    watch = _travar_relogio(session, watch_id)
+    _travar_anuncios(session, watch, operacao)
+    _guard_sem_historico(session, watch, operacao)
+    return watch
+
+
+def _mensagem_integridade(exc: IntegrityError, watch_id: int, novo_ean: str | None) -> str:
+    restricao = exc.orig.diag.constraint_name if isinstance(exc.orig, pg_errors.Error) else None
+    # watch_ean_key e o nome que o Postgres da ao unique da coluna ean (models.Watch.ean)
+    if isinstance(exc.orig, pg_errors.UniqueViolation) and restricao == "watch_ean_key":
+        return f"Ja existe um relogio com o EAN {novo_ean}"
+    return (
+        f"O banco recusou a alteracao do relogio {watch_id}: "
+        f"restricao {restricao or 'desconhecida'} violada"
+    )
+
+
 def update_watch(session: Session, watch_id: int, data: WatchUpdate) -> Watch:
     watch = _get_watch(session, watch_id)
     campos = data.model_dump(exclude_unset=True)
     novo_ean = campos.get("ean")
     if novo_ean is not None and novo_ean != watch.ean:
-        _guard_sem_historico(session, watch, "trocar o EAN do relogio")
-        mensagem = f"Ja existe um relogio com o EAN {novo_ean}"
-        if session.scalar(select(Watch.id).where(Watch.ean == novo_ean)) is not None:
-            raise ConflictError(mensagem)
+        watch = _travar_sem_historico(session, watch_id, "trocar o EAN do relogio")
+        outro = session.scalar(select(Watch.id).where(Watch.ean == novo_ean, Watch.id != watch_id))
+        if outro is not None:
+            raise ConflictError(f"Ja existe um relogio com o EAN {novo_ean}")
     try:
         with session.begin_nested():
             for campo, valor in campos.items():
                 setattr(watch, campo, valor)
-    except IntegrityError:
-        # corrida entre dois relogios com o mesmo EAN: o indice unico decide
-        raise ConflictError(f"Ja existe um relogio com o EAN {novo_ean}") from None
+    except IntegrityError as exc:
+        raise ConflictError(_mensagem_integridade(exc, watch_id, novo_ean)) from None
     session.commit()
     session.refresh(watch)
     return watch
@@ -110,10 +179,19 @@ def update_watch(session: Session, watch_id: int, data: WatchUpdate) -> Watch:
 
 def delete_watch(session: Session, watch_id: int) -> None:
     """Remove o relogio e os anuncios dele. Nunca toca em price_reading nem publication."""
-    watch = _get_watch(session, watch_id)
-    _guard_sem_historico(session, watch, "excluir o relogio")
-    session.execute(delete(Listing).where(Listing.watch_id == watch.id))
-    session.delete(watch)
+    operacao = "excluir o relogio"
+    watch = _travar_sem_historico(session, watch_id, operacao)
+    try:
+        with session.begin_nested():
+            session.execute(delete(Listing).where(Listing.watch_id == watch.id))
+            session.delete(watch)
+    except IntegrityError:
+        # os locks acima impedem isto; se ainda assim a FK barrar, o savepoint desfaz tudo
+        raise ConflictError(
+            f"Nao e possivel {operacao} (relogio {watch_id}): ele passou a ter historico "
+            "durante a operacao. Nada foi apagado; para tirar o relogio de circulacao, "
+            "pause a vigilancia."
+        ) from None
     session.commit()
 
 
