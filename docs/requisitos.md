@@ -68,7 +68,7 @@ A plataforma tem 52 requisitos funcionais: 28 no MVP, 23 na fase 2 e 1 como idei
 
 | ID | Módulo | Requisito | Fase |
 | --- | --- | --- | --- |
-| RF01 | Catálogo | Cadastrar relógio com marca, referência do fabricante, EAN (opcional), tipo de movimento e tamanho da caixa | MVP |
+| RF01 | Catálogo | Cadastrar relógio com marca, referência do fabricante, EAN (obrigatório e único — chave natural do relógio), tipo de movimento (automático, quartzo, manual, solar, híbrido) e tamanho da caixa | MVP |
 | RF02 | Catálogo | Vincular ao relógio um ou mais anúncios (marketplace e ID ou URL) | MVP |
 | RF03 | Catálogo | Pausar a vigilância, definir preço-alvo, exigir loja oficial ou reputação mínima do vendedor, e importar e exportar o catálogo em CSV | MVP |
 | RF04 | Adaptadores | Consultar preço, estoque e vendedor de um anúncio por uma interface comum a todos os marketplaces | MVP |
