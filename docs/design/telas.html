@@ -1,0 +1,1398 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Pulso Promos — telas em 5 paletas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+  --ui-bg:#0E0E13; --ui-surf:#171720; --ui-line:#2C2C3A; --ui-txt:#F4F4F7; --ui-sec:#A2A2B4; --ui-acc:#7C5CFF;
+}
+@media (prefers-color-scheme: light){
+  :root:not([data-theme="dark"]){ --ui-bg:#F5F5F3; --ui-surf:#FFFFFF; --ui-line:#DEDCD5; --ui-txt:#17191A; --ui-sec:#5A5F60; }
+}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:calc(env(safe-area-inset-top,0px) + 64px)}
+body{margin:0;background:var(--ui-bg);color:var(--ui-txt);font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;font-size:15px;line-height:1.6}
+header.bar{position:sticky;top:0;z-index:20;background:var(--ui-surf);border-bottom:1px solid var(--ui-line);padding:calc(env(safe-area-inset-top,0px) + 12px) 20px 12px}
+.bar h1{margin:0 0 2px;font-size:17px;font-weight:600}
+.bar p{margin:0 0 10px;font-size:12px;color:var(--ui-sec)}
+.controls{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.seg{display:flex;flex-wrap:wrap;gap:6px}
+button.tab{font:inherit;font-size:12px;font-weight:500;padding:7px 12px;border-radius:999px;border:1px solid var(--ui-line);background:transparent;color:var(--ui-sec);cursor:pointer}
+button.tab[aria-pressed="true"]{background:var(--ui-acc);border-color:var(--ui-acc);color:#fff}
+.sep{width:1px;height:22px;background:var(--ui-line)}
+select{font:inherit;font-size:12px;padding:6px 10px;border-radius:8px;border:1px solid var(--ui-line);background:var(--ui-surf);color:var(--ui-txt)}
+main{padding:20px;max-width:1600px;margin:0 auto}
+.note{font-size:12px;color:var(--ui-sec);margin:0 0 18px}
+.block{margin:0 0 28px}
+.block h2{font-size:14px;font-weight:600;margin:0 0 8px;color:var(--ui-txt)}
+.holder{overflow:hidden;border-radius:12px;border:1px solid var(--ui-line);background:#000}
+.scaler{transform-origin:top left}
+.cmp{display:grid;gap:16px;grid-template-columns:repeat(2,minmax(0,1fr))}
+@media (max-width:900px){ .cmp{grid-template-columns:1fr} }
+.cmp .tagline{font-size:12px;color:var(--ui-sec);margin:0 0 6px}
+
+/* ---------- telas ---------- */
+.theme{
+  --shopee:#EE4D2D; --ali:#E62E04; --ml:#FFE600; --amz:#FF9900;
+}
+.frame{width:1440px;font-family:Inter,sans-serif;background:var(--bg);color:var(--txt);display:flex;overflow:hidden}
+.frame.mobile{width:390px;display:block}
+.app{display:flex;width:100%}
+.side{width:240px;background:var(--surf);padding:24px 16px;display:flex;flex-direction:column;gap:24px;flex:none}
+.brand{display:flex;align-items:center;gap:10px;font-weight:600;font-size:15px}
+.logo{width:22px;height:22px;border-radius:50%;background:var(--acc);flex:none}
+.nav{display:flex;flex-direction:column;gap:4px}
+.nav a{padding:10px 12px;border-radius:8px;font-size:14px;color:var(--sec);text-decoration:none}
+.nav a.on{background:var(--accSoft);color:var(--acc);font-weight:500}
+.side .spacer{flex:1}
+.me{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;background:var(--elev)}
+.me .av{width:24px;height:24px;border-radius:50%;background:var(--bStrong)}
+.me b{font-size:13px;font-weight:500;display:block}
+.me span{font-size:11px;color:var(--muted)}
+.main{flex:1;padding:28px;display:flex;flex-direction:column;gap:20px;min-width:0}
+.top{display:flex;justify-content:space-between;align-items:center;gap:16px}
+.top h1{margin:0;font-size:24px;font-weight:600}
+.top .sub{font-size:13px;color:var(--sec);margin-top:4px}
+.btn{font-size:13px;font-weight:500;padding:10px 16px;border-radius:8px;background:var(--acc);color:var(--onAcc);display:inline-block}
+.btn.ghost{background:var(--surf);border:1px solid var(--bord);color:var(--sec)}
+.btn.block{display:block;text-align:center}
+.card{background:var(--surf);border:1px solid var(--bord);border-radius:12px;padding:18px;display:flex;flex-direction:column;gap:14px}
+.card h3{margin:0;font-size:15px;font-weight:600}
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.kpi b{font-size:26px;font-weight:600;display:block}
+.kpi .lab{font-size:12px;color:var(--sec);font-weight:500}
+.kpi .d{font-size:12px}
+.chip{display:inline-block;padding:4px 8px;border-radius:6px;font-size:11px;font-weight:500;background:var(--elev);color:var(--sec)}
+.chip.ok{background:var(--okSoft);color:var(--ok)}
+.chip.warn{background:var(--warnSoft);color:var(--warn)}
+.chip.dang{background:var(--dangSoft);color:var(--dang)}
+.chip.acc{background:var(--accSoft);color:var(--acc)}
+.tbl{background:var(--surf);border:1px solid var(--bord);border-radius:12px;overflow:hidden}
+.tbl .th,.tbl .tr{display:flex;gap:12px;align-items:center;padding:14px 18px}
+.tbl .th{background:var(--elev);padding:12px 18px;font-size:11px;color:var(--muted);font-weight:500}
+.tbl .tr{border-top:1px solid var(--bord);font-size:13px;color:var(--sec)}
+.tbl .tr b{color:var(--txt);font-weight:500;font-size:14px}
+.tbl .tr small{color:var(--muted);font-size:11px;display:block}
+.pill{padding:9px 14px;border-radius:8px;border:1px solid var(--bord);background:var(--surf);font-size:12px;color:var(--sec)}
+.input{padding:10px 14px;border-radius:8px;border:1px solid var(--bord);background:var(--input);font-size:13px;color:var(--muted)}
+.row{display:flex;align-items:center;gap:12px}
+.between{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.muted{color:var(--muted);font-size:12px}
+.sec{color:var(--sec);font-size:12px}
+.big{font-size:20px;font-weight:600;color:var(--ok)}
+.tog{width:38px;height:22px;border-radius:11px;background:var(--bStrong);position:relative;flex:none}
+.tog.on{background:var(--acc)}
+.tog i{position:absolute;top:3px;left:3px;width:16px;height:16px;border-radius:50%;background:var(--txt)}
+.tog.on i{left:19px;background:var(--onAcc)}
+.tog.lock{background:var(--elev)} .tog.lock i{background:var(--muted)}
+.banner{padding:12px 14px;border-radius:10px;font-size:12px}
+.ph{background:var(--elev);border-radius:10px}
+/* avatar do leitor + menu suspenso */
+.avatarDD{position:relative;list-style:none}
+.avatarDD summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:6px;color:var(--sec);font-size:12px}
+.avatarDD summary::-webkit-details-marker{display:none}
+.avatarDD .avImg{width:36px;height:36px;border-radius:50%;background:var(--acc);flex:none}
+.avatarDD .menu{position:absolute;right:0;top:calc(100% + 8px);background:var(--surf);border:1px solid var(--bord);border-radius:10px;padding:6px;width:160px;box-shadow:0 8px 24px rgba(0,0,0,.35);z-index:5}
+.avatarDD .menu a{display:block;padding:9px 10px;border-radius:6px;font-size:13px;color:var(--sec);text-decoration:none}
+.avatarDD .menu a:hover{background:var(--elev);color:var(--txt)}
+/* página de produto */
+.pTop{display:flex;gap:24px;align-items:flex-start}
+.pImg{width:640px;height:420px;flex:none}
+.pInfo{flex:1;display:flex;flex-direction:column;gap:12px;min-width:0}
+.pActions{display:flex;gap:10px}
+.pcGrid{display:grid;grid-template-columns:1fr 1fr;gap:32px}
+.pcCol{display:flex;flex-direction:column;gap:8px}
+.pcItem{display:flex;gap:8px;align-items:flex-start;font-size:13px;color:var(--sec)}
+.specsGrid{display:grid;grid-template-columns:1fr 1fr;gap:0 40px}
+.specsRow{display:flex;justify-content:space-between;padding:6px 0;font-size:13px}
+.videoCard{border:1px dashed var(--bStrong);border-radius:12px;padding:18px;display:flex;flex-direction:column;gap:6px}
+/* seções da página de produto */
+.section{display:flex;flex-direction:column;gap:12px}
+.sectionTitle{font-size:21px;font-weight:600;color:var(--txt);margin:0;letter-spacing:-.01em}
+.histGrid{display:grid;grid-template-columns:1.7fr 1fr;gap:16px;height:480px}
+.histGrid > .card{height:100%;overflow:hidden}
+.storesScroll{flex:1;min-height:0;overflow-y:auto;display:flex;flex-direction:column;gap:14px;padding-right:4px;margin-top:2px}
+.storeRow{position:relative;display:flex;flex-direction:column;gap:8px;padding:14px;border-radius:12px;border:1px solid var(--bord);background:var(--elev);flex:none}
+.storeRow.best{border:2px solid var(--acc);background:var(--accSoft);box-shadow:0 0 0 1px var(--acc),0 0 20px -4px var(--acc)}
+.bestBadge{position:absolute;top:-11px;right:14px;background:var(--acc);color:var(--onAcc);font-size:11px;font-weight:700;padding:4px 10px;border-radius:999px;box-shadow:0 3px 10px rgba(0,0,0,.4)}
+/* cupom em modal */
+.couponWrap{position:relative;display:inline-block}
+.couponModalBackdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);align-items:center;justify-content:center;z-index:50}
+.couponModal{background:var(--surf);border:1px solid var(--bord);border-radius:14px;padding:22px;width:340px;display:flex;flex-direction:column;gap:14px}
+.couponModal h3{margin:0;font-size:16px}
+.modalClose{cursor:pointer;color:var(--muted);font-size:15px;line-height:1}
+.couponCode{display:flex;justify-content:space-between;align-items:center;padding:12px 14px;border-radius:10px;background:var(--input);border:1px dashed var(--bStrong);cursor:pointer}
+.couponCode .couponCodeText{font-size:16px;font-weight:600;color:var(--txt);letter-spacing:.02em}
+.copyHint{font-size:12px;color:var(--acc);font-weight:500}
+.couponNote{font-size:12px;color:var(--sec)}
+.couponWarn{font-size:11px;color:var(--muted)}
+.authModalBackdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);align-items:center;justify-content:center;z-index:60}
+.authModal{background:var(--surf);border:1px solid var(--bord);border-radius:14px;padding:26px;width:380px;display:flex;flex-direction:column;gap:14px;text-align:left}
+.authModal h3{margin:0;font-size:19px;font-weight:700;line-height:1.32}
+.authBenefitBox{border:1px solid var(--bord);border-radius:10px;padding:14px 16px}
+.authBenefitRow{display:flex;align-items:center;gap:10px;font-size:13.5px;font-weight:500;color:var(--txt)}
+.authBenefitIcon{color:var(--acc);font-size:15px;flex:none}
+.authBenefits div{display:flex;gap:8px;align-items:flex-start}
+/* perfil e favoritos */
+.favWrap{display:flex;gap:24px;align-items:flex-start}
+.profCard{width:280px;flex:none;background:var(--surf);border:1px solid var(--bord);border-radius:12px;padding:20px;display:flex;flex-direction:column;gap:10px}
+.profAv{width:56px;height:56px;border-radius:50%;background:var(--acc)}
+.favTabs{display:flex;gap:6px}
+.favTabs span{padding:8px 12px;border-radius:8px;font-size:12px;color:var(--sec)}
+.favTabs span.on{background:var(--accSoft);color:var(--acc);font-weight:500}
+.favGrid{flex:1;display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.favCard{background:var(--surf);border:1px solid var(--bord);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:10px}
+.favImg{height:130px}
+.heart{color:var(--dang);font-size:14px}
+/* login */
+.login{width:100%;display:flex;align-items:center;justify-content:center;background:var(--bg)}
+.loginCard{width:420px;background:var(--surf);border:1px solid var(--bord);border-radius:16px;padding:32px;display:flex;flex-direction:column;gap:20px}
+/* site */
+.site{display:block;width:100%}
+.sHead{display:flex;justify-content:space-between;align-items:center;gap:24px;padding:16px 40px;background:var(--surf)}
+.sNav{display:flex;gap:22px;font-size:13px;color:var(--sec)}
+.sBody{padding:28px 40px 40px;display:flex;flex-direction:column;gap:20px}
+.offers{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.offer{background:var(--surf);border:1px solid var(--bord);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:10px}
+.offer .img{height:150px}
+.offer h4{margin:0;font-size:14px;font-weight:500}
+/* telegram */
+.tg{background:var(--bg);min-height:844px}
+.tgHead{display:flex;align-items:center;gap:10px;padding:44px 16px 12px;background:var(--surf)}
+.tgHead .av{width:34px;height:34px;border-radius:50%;background:var(--acc)}
+.tgBody{padding:16px 12px;display:flex;flex-direction:column;gap:12px}
+.bubble{background:var(--surf);border:1px solid var(--bord);border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:10px}
+.kb{display:flex;flex-direction:column;gap:8px}
+.kb .rowb{display:flex;gap:8px}
+.kb .rowb > *{flex:1;text-align:center;font-size:12px;padding:10px;border-radius:8px}
+.priceChangeRow{font-size:12px;color:var(--sec);margin-top:-4px}
+.chart{position:relative;height:210px;margin-top:4px}
+.chart .gl{position:absolute;left:46px;right:0;height:1px;background:var(--bord)}
+.chart .gl span{position:absolute;left:0;top:-8px;width:38px;text-align:right;font-size:10px;color:var(--muted)}
+.chart svg{position:absolute;left:46px;top:0;right:0;height:100%}
+
+/* ======================================================================
+   Composições exclusivas do site público por conceito (Silver / Gold / Sale)
+   As classes funcionais (couponWrap, priceCardWrap, storeRow, priceDisplay,
+   tog, avatarDD, favCard...) continuam as mesmas — só a casca visual muda.
+   ====================================================================== */
+@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Manrope:wght@400;500;600;700&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Montserrat:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500&display=swap');
+
+/* ---------- SILVER LUXURY ---------- */
+.slv-page{font-family:'Manrope',sans-serif}
+.slv-page .serif{font-family:'DM Serif Display',serif;font-style:italic}
+.slv-header{display:flex;align-items:center;justify-content:space-between;padding:26px 48px;border-bottom:1px solid var(--bord)}
+.slv-mark{font-family:'DM Serif Display',serif;font-size:18px}
+.slv-nav{display:flex;gap:32px;font-size:12px;color:var(--muted);letter-spacing:.02em}
+.slv-nav span:first-child{color:var(--txt)}
+.slv-hero{position:relative;padding:70px 48px 84px;display:grid;grid-template-columns:1fr auto;gap:32px;align-items:center;overflow:hidden}
+.slv-hero::before{content:'';position:absolute;top:-40%;right:0;width:46%;height:180%;background:radial-gradient(circle,color-mix(in srgb,var(--acc) 12%,transparent) 0%,transparent 70%)}
+.slv-h1{position:relative;font-family:'DM Serif Display',serif;font-size:36px;line-height:1.15;margin:0 0 14px;font-weight:400;max-width:520px}
+.slv-rule{position:relative;width:56px;height:1px;background:linear-gradient(90deg,var(--acc),transparent);margin:0 0 14px}
+.slv-sub{position:relative;font-size:13.5px;line-height:1.7;color:var(--sec);margin:0;max-width:420px}
+.slv-ring{position:relative;width:150px;height:150px;border-radius:50%;background:radial-gradient(circle at 32% 28%,color-mix(in srgb,var(--acc) 45%,transparent),transparent 65%);border:1px solid var(--bord)}
+.slv-pagehead{padding:44px 48px 30px;border-bottom:1px solid var(--bord)}
+.slv-pagehead .crumb{font-size:11.5px;color:var(--muted);margin-bottom:12px}
+.slv-pagehead h1{font-family:'DM Serif Display',serif;font-weight:400;font-size:30px;margin:0}
+.slv-body{padding:44px 48px 70px}
+.slv-section-head{display:flex;justify-content:space-between;align-items:flex-end;margin:0 0 28px;border-bottom:1px solid var(--bord);padding-bottom:16px}
+.slv-section-head h2{font-family:'DM Serif Display',serif;font-weight:400;font-size:21px;margin:0}
+.slv-section-head span{font-size:11.5px;color:var(--muted)}
+.slv-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--bord)}
+.slv-card{background:var(--bg);padding:22px;display:flex;flex-direction:column;gap:12px}
+.slv-card-art{height:150px;background:linear-gradient(160deg,var(--elev),var(--bg) 70%);border:1px solid var(--bord);position:relative;overflow:hidden}
+.slv-card-meta{display:flex;justify-content:space-between;font-size:10.5px;color:var(--muted)}
+.slv-card-name{font-size:14.5px;font-weight:500;margin:0}
+.slv-card-price{display:flex;align-items:baseline;gap:8px}
+.slv-card-price b{font-size:18px;font-weight:600;color:var(--txt)}
+.slv-page .btn{border-radius:2px;background:var(--acc);color:var(--onAcc);font-weight:600}
+.slv-page .btn.ghost{background:transparent;border:1px solid var(--acc);color:var(--txt)}
+.slv-page .couponModal,.slv-page .couponCode,.slv-page .card{border-radius:2px}
+.slv-page .storeRow{border-radius:2px}
+.slv-page .storeRow.best{border-width:1px}
+.slv-panel{border:1px solid var(--bord);padding:26px;background:var(--bg)}
+.slv-two{display:grid;grid-template-columns:1fr 1fr;gap:36px;align-items:start}
+.slv-profile{border:1px solid var(--bord);padding:26px;display:flex;flex-direction:column;gap:14px;width:260px;flex:none}
+.slv-avatar{width:48px;height:48px;border-radius:50%;background:var(--acc)}
+
+/* ---------- GOLD PREMIUM ---------- */
+.gld-page{font-family:'Montserrat',sans-serif}
+.gld-topline{text-align:center;padding:9px;font-size:10px;letter-spacing:.12em;color:var(--acc);border-bottom:1px solid var(--bord)}
+.gld-header{text-align:center;padding:22px 40px 18px}
+.gld-mark{font-family:'Cormorant Garamond',serif;font-size:25px;font-weight:500;color:var(--txt)}
+.gld-rule{width:120px;height:1px;background:linear-gradient(90deg,transparent,var(--acc),transparent);margin:13px auto}
+.gld-nav{display:flex;justify-content:center;gap:28px;font-size:11px;letter-spacing:.04em;color:var(--sec)}
+.gld-hero{display:grid;grid-template-columns:.9fr 1fr;align-items:stretch}
+.gld-hero-copy{padding:56px 48px;display:flex;flex-direction:column;justify-content:center}
+.gld-h1{font-family:'Cormorant Garamond',serif;font-size:34px;font-style:italic;font-weight:500;line-height:1.18;margin:0 0 16px;color:var(--txt)}
+.gld-sub{font-size:13px;line-height:1.8;color:var(--sec);max-width:340px;margin:0}
+.gld-hero-art{position:relative;background:radial-gradient(ellipse at 50% 30%,var(--elev) 0%,var(--bg) 75%);padding:34px;display:flex;align-items:center;justify-content:center}
+.gld-frame{width:100%;max-width:210px;aspect-ratio:4/5;border:1px solid var(--acc);padding:9px}
+.gld-frame-inner{width:100%;height:100%;background:radial-gradient(circle at 40% 30%,var(--elev),var(--bg) 75%)}
+.gld-pagehead{text-align:center;padding:38px 40px 26px;border-bottom:1px solid var(--bord)}
+.gld-pagehead .crumb{font-size:10.5px;color:var(--muted);margin-bottom:10px}
+.gld-pagehead h1{font-family:'Cormorant Garamond',serif;font-style:italic;font-weight:500;font-size:27px;margin:0;color:var(--txt)}
+.gld-body{padding:50px 48px 70px}
+.gld-section-head{text-align:center;margin-bottom:32px}
+.gld-section-head h2{font-family:'Cormorant Garamond',serif;font-style:italic;font-weight:500;font-size:23px;color:var(--txt);margin:0 0 6px}
+.gld-section-head span{font-size:11px;color:var(--muted);letter-spacing:.02em}
+.gld-grid{display:flex;justify-content:center;gap:28px;flex-wrap:wrap}
+.gld-card{width:220px;text-align:left}
+.gld-card-frame{aspect-ratio:3/4;border:1px solid var(--bord);padding:7px;margin-bottom:14px}
+.gld-card-art{width:100%;height:100%;background:radial-gradient(circle at 35% 25%,var(--elev),var(--bg) 75%)}
+.gld-card-store{font-size:10px;letter-spacing:.05em;color:var(--acc);margin-bottom:6px}
+.gld-card-name{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:17px;color:var(--txt);margin:0 0 8px;font-weight:500}
+.gld-card-price{font-size:16px;color:var(--acc);font-weight:500}
+.gld-page .btn{background:var(--acc);color:var(--onAcc);border-radius:1px;font-weight:600;letter-spacing:.03em}
+.gld-page .btn.ghost{background:transparent;border:1px solid var(--acc);color:var(--txt)}
+.gld-page .card,.gld-page .couponModal,.gld-page .storeRow{border-radius:2px}
+.gld-panel{border:1px solid var(--bord);padding:30px;background:var(--bg2,var(--surf))}
+.gld-two{display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:start}
+.gld-profile{border:1px solid var(--bord);padding:28px;display:flex;flex-direction:column;gap:12px;width:250px;flex:none;text-align:center}
+.gld-avatar{width:52px;height:52px;border-radius:50%;background:var(--acc);margin:0 auto}
+
+/* ---------- GOLD & SILVER LUXURY SALE ---------- */
+.sle-page{font-family:'Inter',sans-serif}
+.sle-strip{text-align:center;padding:8px;font-size:11.5px;font-weight:600;color:var(--acc);border-bottom:1px solid var(--bord)}
+.sle-header{display:flex;align-items:center;justify-content:space-between;padding:18px 40px;border-bottom:1px solid var(--bord)}
+.sle-mark{font-family:'Playfair Display',serif;font-weight:700;font-size:19px;color:var(--txt)}
+.sle-mark span{color:var(--acc)}
+.sle-nav{display:flex;gap:26px;font-size:12.5px;font-weight:500;color:var(--sec)}
+.sle-nav span:first-child{color:var(--txt)}
+.sle-hero{position:relative;padding:56px 40px;overflow:hidden;text-align:center}
+.sle-hero::before{content:'';position:absolute;inset:0;background:
+  radial-gradient(circle at 14% 20%,color-mix(in srgb,var(--acc) 20%,transparent),transparent 42%),
+  radial-gradient(circle at 86% 78%,color-mix(in srgb,var(--line2) 18%,transparent),transparent 42%)}
+.sle-badge{position:relative;display:inline-block;padding:6px 16px;border-radius:999px;background:var(--elev);border:1px solid var(--bStrong);color:var(--acc);font-size:11.5px;font-weight:600;margin-bottom:18px}
+.sle-h1{position:relative;font-family:'Playfair Display',serif;font-weight:700;font-size:33px;line-height:1.16;margin:0 auto 12px;max-width:620px;color:var(--txt)}
+.sle-h1 em{font-style:italic;color:var(--acc)}
+.sle-sub{position:relative;font-size:13.5px;color:var(--sec);max-width:440px;margin:0 auto}
+.sle-pagehead{padding:30px 40px;border-bottom:1px solid var(--bord)}
+.sle-pagehead .crumb{font-size:11px;color:var(--muted);margin-bottom:8px}
+.sle-pagehead h1{font-family:'Playfair Display',serif;font-weight:700;font-size:24px;margin:0;color:var(--txt)}
+.sle-body{padding:34px 40px 70px}
+.sle-section-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:22px}
+.sle-section-head h2{font-family:'Playfair Display',serif;font-weight:700;font-size:20px;margin:0;color:var(--txt)}
+.sle-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.sle-card{background:var(--surf);border-radius:14px;border:1px solid var(--bord);padding:14px;display:flex;flex-direction:column;gap:8px;position:relative}
+.sle-card.gold-edge{border-color:var(--acc);box-shadow:0 0 0 1px var(--acc) inset}
+.sle-card-art{height:110px;border-radius:9px;background:linear-gradient(155deg,var(--elev),var(--bg) 75%);position:relative}
+.sle-pct{position:absolute;top:10px;right:10px;font-size:10.5px;font-weight:700;padding:4px 8px;border-radius:6px;background:color-mix(in srgb,var(--acc) 20%,transparent);color:var(--acc)}
+.sle-card-name{font-size:13.5px;font-weight:600;margin:0;color:var(--txt)}
+.sle-card-store{font-size:10.5px;color:var(--muted)}
+.sle-card-price{font-size:17px;font-weight:700;color:var(--txt)}
+.sle-page .btn{border-radius:8px;font-weight:700;background:linear-gradient(135deg,var(--acc),color-mix(in srgb,var(--acc) 70%,#000));color:var(--onAcc)}
+.sle-page .btn.ghost{background:none;border:1px solid var(--bStrong);color:var(--txt)}
+.sle-page .card,.sle-page .couponModal{border-radius:14px}
+.sle-page .storeRow{border-radius:12px}
+.sle-panel{border-radius:16px;border:1px solid var(--bord);padding:24px;background:var(--surf)}
+.sle-two{display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start}
+.sle-profile{border-radius:16px;border:1px solid var(--bord);padding:24px;display:flex;flex-direction:column;gap:12px;width:250px;flex:none;background:var(--surf)}
+.sle-avatar{width:50px;height:50px;border-radius:50%;background:linear-gradient(135deg,var(--acc),var(--line2))}
+</style>
+</head>
+<body>
+<header class="bar">
+  <h1>Pulso Promos — 13 telas, paletas luxury</h1>
+  <p>Mesma estrutura e tipografia, só as cores mudam. Cores das lojas (Shopee, AliExpress, Mercado Livre, Amazon) são fixas.</p>
+  <div class="controls">
+    <div class="seg" id="modeSeg">
+      <button class="tab" data-mode="pal" aria-pressed="true">Uma paleta, todas as telas</button>
+      <button class="tab" data-mode="cmp" aria-pressed="false">Uma tela, as 4 paletas</button>
+    </div>
+    <div class="sep" aria-hidden="true"></div>
+    <div class="seg" id="palSeg"></div>
+    <div class="sep" aria-hidden="true"></div>
+    <label class="sec" for="scr">Tela</label>
+    <select id="scr"></select>
+  </div>
+</header>
+<main>
+  <p class="note" id="note"></p>
+  <div id="stage"></div>
+</main>
+<script>
+const PALS = {
+  roxo:{nome:'Roxa (padrão)', ideia:'Nosso padrão atual, para referência', v:{bg:'#0E0E13',surf:'#171720',elev:'#20202B',input:'#12121A',bord:'#2C2C3A',bStrong:'#3D3D4F',txt:'#F4F4F7',sec:'#A2A2B4',muted:'#6E6E82',acc:'#7C5CFF',accSoft:'#2A2352',ok:'#34C77B',okSoft:'#12321F',warn:'#F0A92E',warnSoft:'#3A2A0C',dang:'#E2504F',dangSoft:'#3A1618',onAcc:'#FFFFFF',ml:'#FFE600',line2:'#37C6B6'}},
+  silver:{nome:'Silver Luxury', ideia:'Prata, preto e grafite — clean e tecnológico', v:{bg:'#0D0D0F',surf:'#181A1D',elev:'#202226',input:'#0A0A0C',bord:'#2C2C30',bStrong:'#3D3D42',txt:'#F4F5F6',sec:'#A7ABB1',muted:'#6E7278',acc:'#C9CCD1',accSoft:'#2A2C30',ok:'#5FBE86',okSoft:'#132A1F',warn:'#D2A23D',warnSoft:'#332908',dang:'#C75A54',dangSoft:'#2E1614',onAcc:'#111214',ml:'#FFE600',line2:'#6FA8B7'}},
+  gold:{nome:'Gold Premium', ideia:'Preto e dourado — clássico e refinado', v:{bg:'#0B0A08',surf:'#18140D',elev:'#211B10',input:'#0F0C07',bord:'#2E2718',bStrong:'#4A3B1F',txt:'#F1EAD8',sec:'#C9BFA4',muted:'#9C917A',acc:'#D4AF37',accSoft:'#332508',ok:'#7C9A5B',okSoft:'#1C2614',warn:'#C98A3D',warnSoft:'#31220C',dang:'#A23B34',dangSoft:'#2C1512',onAcc:'#0B0A08',ml:'#FFE600',line2:'#8C9AA6'}},
+  sale:{nome:'Gold & Silver Sale', ideia:'Dourado e prata — comercial e impactante', v:{bg:'#0C0C0D',surf:'#171719',elev:'#202023',input:'#0A0A0B',bord:'#262629',bStrong:'#35353A',txt:'#F7F7F7',sec:'#C7C7CA',muted:'#9A9A9A',acc:'#D4AF37',accSoft:'#332508',ok:'#4CAF7A',okSoft:'#122A1E',warn:'#D98F3D',warnSoft:'#332408',dang:'#9E2525',dangSoft:'#2E1414',onAcc:'#161104',ml:'#FFE600',line2:'#C4C7CC'}}
+};
+
+
+const side = (on) => {
+  const items = ['Visão geral','Catálogo','Fila de revisão','Cupons','Posts','Medição','Configurações'];
+  return `<div class="side">
+    <div class="brand"><i class="logo"></i>Pulso Promos</div>
+    <nav class="nav">${items.map(i=>`<a class="${i===on?'on':''}">${i}</a>`).join('')}</nav>
+    <div class="spacer"></div>
+    <div class="me"><i class="av"></i><div><b>Matheus</b><span>Administrador</span></div></div>
+  </div>`;
+};
+const topBar = (h1,sub,right='') => `<div class="top"><div><h1>${h1}</h1><div class="sub">${sub}</div></div>${right}</div>`;
+const mk = (nome) => {
+  const c = {Shopee:'--shopee','AliExpress':'--ali','Mercado Livre':'--ml','ML':'--ml','Amazon':'--amz'}[nome];
+  return `<span class="chip" style="color:var(${c})">${nome}</span>`;
+};
+const mkBest = (nome) => {
+  const c = {Shopee:'--shopee','AliExpress':'--ali','Mercado Livre':'--ml','ML':'--ml','Amazon':'--amz'}[nome];
+  return `<span class="chip" style="color:var(${c})">Menor preço via ${nome}</span>`;
+};
+
+// ---- gráfico de histórico de preço: preço à vista + preço parcelado, com filtro de período ----
+function niceGridlines(minY,maxY,count){
+  const arr=[];
+  for(let i=0;i<count;i++){ arr.push(Math.round((minY+(maxY-minY)*(i/(count-1)))/10)*10); }
+  return arr;
+}
+function buildDateLabels(n){
+  const end = new Date(2026,8,21); // 21 de setembro de 2026, 1 ponto por dia
+  return Array.from({length:n},(_,i)=> new Date(end.getTime() - (n-1-i)*86400000))
+    .map(d=>d.toLocaleDateString('pt-BR',{day:'2-digit',month:'short'}).replace('.',''));
+}
+function dateAxisRow(n){
+  const labels = buildDateLabels(n);
+  const idx = [...new Set([0, Math.round((n-1)*0.25), Math.round((n-1)*0.5), Math.round((n-1)*0.75), n-1])];
+  return `<div class="between muted axisRow">${idx.map(i=>`<span>${labels[i]}</span>`).join('')}</div>`;
+}
+function priceLegend(){
+  return `<div class="row" style="gap:14px">
+    <div class="row" style="gap:6px"><i style="width:12px;height:2px;background:var(--acc);display:inline-block"></i><span class="muted">Preço à vista</span></div>
+    <div class="row" style="gap:6px"><i style="width:12px;height:2px;background:var(--line2);display:inline-block;background-image:repeating-linear-gradient(90deg,var(--line2) 0 4px,transparent 4px 7px)"></i><span class="muted">Preço parcelado</span></div>
+  </div>`;
+}
+function priceChartInner(cash, inst, w, h, minY, maxY){
+  const yOf = v => (h - ((v-minY)/(maxY-minY))*h).toFixed(1);
+  const xOf = i => ((w/(cash.length-1))*i).toFixed(1);
+  const grid = niceGridlines(minY,maxY,4);
+  const gridHTML = grid.map(v=>`<div class="gl" style="top:${yOf(v)}px"><span>R$ ${v}</span></div>`).join('');
+  const ptsA = cash.map((p,i)=>`${xOf(i)},${yOf(p)}`).join(' ');
+  const ptsB = inst.map((p,i)=>`${xOf(i)},${yOf(p)}`).join(' ');
+  const lx=xOf(cash.length-1), lyA=yOf(cash[cash.length-1]), lyB=yOf(inst[inst.length-1]);
+  return `${gridHTML}
+    <svg viewBox="0 0 ${w} ${h}" preserveAspectRatio="none">
+      <polyline points="${ptsB}" fill="none" stroke="var(--line2)" stroke-width="2" stroke-dasharray="5 4"/>
+      <polyline points="${ptsA}" fill="none" stroke="var(--acc)" stroke-width="2"/>
+      <circle cx="${lx}" cy="${lyB}" r="4" fill="var(--line2)"/>
+      <circle cx="${lx}" cy="${lyA}" r="4" fill="var(--acc)"/>
+    </svg>`;
+}
+// gerador determinístico (mesma "aleatoriedade" sempre, para o gráfico não pular a cada render)
+function seededRandom(seed){
+  let t = seed>>>0;
+  return function(){
+    t += 0x6D2B79F5;
+    let r = Math.imul(t ^ t>>>15, 1 | t);
+    r = (r + Math.imul(r ^ r>>>7, 61 | r)) ^ r;
+    return ((r ^ r>>>14) >>> 0) / 4294967296;
+  };
+}
+function genDailySeries(days, endCash, startCash, seed, volatility){
+  const rnd = seededRandom(seed);
+  const arr=[];
+  for(let i=0;i<days;i++){
+    const trend = startCash + (endCash-startCash)*(i/(days-1));
+    arr.push(Math.max(1, Math.round(trend + (rnd()-0.5)*volatility)));
+  }
+  arr[arr.length-1] = endCash; // preço de hoje é o que o catálogo mostra
+  return arr;
+}
+// cartão de histórico completo, com filtro de período (1 ano / 6 meses / 3 meses / 30 dias)
+const PERIOD_LABELS = {365:'No último ano',182:'Nos últimos 6 meses',90:'Nos últimos 3 meses',30:'Nos últimos 30 dias'};
+function priceChangeHTML(cash, inst, days){
+  const label = PERIOD_LABELS[days] || ('Nos últimos '+days+' dias');
+  const pct = arr => ((arr[arr.length-1]-arr[0])/arr[0])*100;
+  const fmt = p => {
+    if(Math.abs(p)<0.05) return {text:'sem variação', tone:'muted'};
+    const dir = p<0 ? 'mais barato' : 'mais caro';
+    const tone = p<0 ? 'ok' : 'dang';
+    return {text: Math.abs(p).toFixed(1).replace('.',',')+'% '+dir, tone};
+  };
+  const c = fmt(pct(cash)), i = fmt(pct(inst));
+  return `<div class="priceChangeRow">${label}: <b style="color:var(--${c.tone})">à vista ${c.text}</b> · <b style="color:var(--${i.tone})">parcelado ${i.text}</b></div>`;
+}
+function priceCardHTML(cashFull, instFull, w, h, defaultDays, opts){
+  opts = opts || {};
+  const withTitle = opts.withTitle !== false;
+  const cash = cashFull.slice(-defaultDays);
+  const inst = instFull.slice(-defaultDays);
+  const allVals=[...cash,...inst];
+  const minY=Math.floor(Math.min(...allVals)/10)*10-10, maxY=Math.ceil(Math.max(...allVals)/10)*10+10;
+  const series = JSON.stringify({cash:cashFull, inst:instFull});
+  const opt=(v,label)=>`<option value="${v}"${v===defaultDays?' selected':''}>${label}</option>`;
+  const filterSelect = `<select class="pill rangeSelect" onchange="pulsoUpdateChart(this)" style="font:inherit;color:var(--sec);border-radius:8px">${opt(365,'1 ano')}${opt(182,'6 meses')}${opt(90,'3 meses')}${opt(30,'30 dias')}</select>`;
+  const headerHTML = withTitle
+    ? `<div class="between"><h3>Histórico de preços</h3>${priceLegend()}</div><div class="row" style="justify-content:flex-end;margin-top:-6px">${filterSelect}</div>`
+    : `<div class="between">${priceLegend()}${filterSelect}</div>`;
+  return `<div class="card priceCardWrap" data-series='${series}' data-w="${w}" data-h="${h}">
+    ${headerHTML}
+    ${priceChangeHTML(cash, inst, defaultDays)}
+    <div class="chart" style="height:${h}px">${priceChartInner(cash,inst,w,h,minY,maxY)}</div>
+    ${dateAxisRow(cash.length)}
+  </div>`;
+}
+// troca o período do gráfico sem re-renderizar a tela inteira
+function pulsoUpdateChart(sel){
+  const wrap = sel.closest('.priceCardWrap');
+  if(!wrap) return;
+  const data = JSON.parse(wrap.getAttribute('data-series'));
+  const days = parseInt(sel.value,10);
+  const cash = data.cash.slice(-days), inst = data.inst.slice(-days);
+  const w = parseInt(wrap.dataset.w,10), h = parseInt(wrap.dataset.h,10);
+  const allVals=[...cash,...inst];
+  const minY=Math.floor(Math.min(...allVals)/10)*10-10, maxY=Math.ceil(Math.max(...allVals)/10)*10+10;
+  wrap.querySelector('.priceChangeRow').outerHTML = priceChangeHTML(cash, inst, days);
+  wrap.querySelector('.chart').innerHTML = priceChartInner(cash,inst,w,h,minY,maxY);
+  wrap.querySelector('.axisRow').outerHTML = dateAxisRow(cash.length);
+}
+// alterna entre preço à vista e preço parcelado na página de produto
+function pulsoSetPriceMode(btn, mode){
+  const toggleRow = btn.parentElement;
+  [...toggleRow.children].forEach(c=>{ c.className='btn ghost'; });
+  btn.className='btn';
+  const disp = toggleRow.parentElement.querySelector('.priceDisplay');
+  if(!disp) return;
+  const d = disp.dataset;
+  const big = disp.querySelector('.bigPrice');
+  const sub = disp.querySelector('.priceSub');
+  if(mode==='cash'){ big.textContent = 'R$ '+d.cash; sub.textContent=''; }
+  else { big.textContent = 'R$ '+d.instTotal; sub.textContent = 'em '+d.instN+'x de R$ '+d.instEach; }
+}
+// modal de cupom: abre, fecha e copia o código
+function pulsoAuthToggle(el, open){
+  const wrap = el.closest('.authWrap');
+  if(!wrap) return;
+  wrap.querySelector('.authModalBackdrop').style.display = open ? 'flex' : 'none';
+}
+function pulsoAuthBackdropClick(e, backdrop){
+  if(e.target === backdrop){ backdrop.style.display = 'none'; }
+}
+function pulsoCouponToggle(el, open){
+  const wrap = el.closest('.couponWrap');
+  if(!wrap) return;
+  wrap.querySelector('.couponModalBackdrop').style.display = open ? 'flex' : 'none';
+}
+function pulsoCouponBackdropClick(e, backdrop){
+  if(e.target === backdrop){ backdrop.style.display = 'none'; }
+}
+function pulsoCopyCoupon(el){
+  const codeEl = el.querySelector('.couponCodeText');
+  const hint = el.querySelector('.copyHint');
+  if(!codeEl || !hint) return;
+  try{ if(navigator.clipboard && navigator.clipboard.writeText){ navigator.clipboard.writeText(codeEl.textContent); } }catch(err){}
+  const original = hint.textContent;
+  hint.textContent = 'Copiado!';
+  setTimeout(()=>{ hint.textContent = original; }, 1500);
+}
+const SCREENS = {};
+
+SCREENS['01 Login'] = `<div class="frame" style="height:1024px"><div class="login"><div class="loginCard">
+  <div class="brand"><i class="logo" style="width:28px;height:28px"></i><span style="font-size:20px">Pulso Promos</span></div>
+  <div><div style="font-size:24px;font-weight:600">Entrar no painel</div><div class="sec" style="margin-top:6px">Acesso restrito a administradores e revisores.</div></div>
+  <div><div class="sec" style="font-size:12px;font-weight:500;margin-bottom:6px">E-mail</div><div class="input">operador@pulsopromos.com.br</div></div>
+  <div><div class="sec" style="font-size:12px;font-weight:500;margin-bottom:6px">Senha</div><div class="input">••••••••••</div></div>
+  <div class="btn block">Entrar</div>
+  <div class="banner" style="background:var(--accSoft);color:var(--sec)">Após a senha, o painel pede o código de verificação em dois fatores (RNF02).</div>
+</div></div></div>`;
+
+SCREENS['02 Visão geral'] = `<div class="frame" style="height:1024px"><div class="app">${side('Visão geral')}<div class="main">
+  ${topBar('Visão geral','Segunda, 21 de setembro de 2026 · última coleta há 12 min','<span class="pill">Últimos 30 dias</span>')}
+  <div class="grid4">
+    <div class="card kpi"><span class="lab">Relógios vigiados</span><b>318</b><span class="d" style="color:var(--ok)">+14 nesta semana</span></div>
+    <div class="card kpi"><span class="lab">Candidatos na fila</span><b>12</b><span class="d" style="color:var(--warn)">4 aguardam há mais de 2 h</span></div>
+    <div class="card kpi"><span class="lab">Posts publicados (30 d)</span><b>84</b><span class="d sec">taxa de aprovação 71%</span></div>
+    <div class="card kpi"><span class="lab">Comissão estimada (30 d)</span><b>R$ 1.248,70</b><span class="d" style="color:var(--ok)">+18% vs. mês anterior</span></div>
+  </div>
+  <div class="grid2">
+    <div class="card"><h3>Coletas por marketplace</h3>
+      ${[['Shopee','--shopee','318 anúncios · 100% ok','ok','Ativo'],['AliExpress','--ali','204 anúncios · 98% ok','ok','Ativo'],['Mercado Livre','--ml','173 anúncios · 91% ok','warn','Atenção'],['Amazon','--amz','sem coleta · aguarda aprovação','','Bloqueado']]
+        .map(([n,c,d,s,st])=>`<div class="between"><div class="row"><i style="width:10px;height:10px;border-radius:50%;background:var(${c})"></i><div><b style="font-size:14px;font-weight:500">${n}</b><div class="muted">${d}</div></div></div><span class="chip ${s}">${st}</span></div>`).join('')}
+    </div>
+    <div class="card"><h3>Alertas do sistema</h3>
+      <div class="banner" style="background:var(--dangSoft);border-left:3px solid var(--dang)"><b style="color:var(--txt);font-weight:500;font-size:13px">Credencial do Mercado Livre expira em 3 dias</b><div class="sec">Renove o token no painel de configurações</div></div>
+      <div class="banner" style="background:var(--warnSoft);border-left:3px solid var(--warn)"><b style="color:var(--txt);font-weight:500;font-size:13px">9 coletas falharam no Mercado Livre</b><div class="sec">Limite de chamadas atingido às 14 h</div></div>
+      <div class="banner" style="background:var(--warnSoft);border-left:3px solid var(--warn)"><b style="color:var(--txt);font-weight:500;font-size:13px">2 cupons vencem hoje</b><div class="sec">CLIENTE10 e RELOGIO15</div></div>
+    </div>
+  </div>
+</div></div></div>`;
+
+const CAT = [
+ ['Orient MBSS1154','Ref. MBSS1154 · automático · 42 mm',['Shopee','ML'],'R$ 612,90','R$ 689,00','R$ 598,00','R$ 620,00','Vigiando','ok'],
+ ['Casio G-Shock GA-2100','Ref. GA-2100-1A1 · quartzo · 45 mm',['Shopee','AliExpress','ML'],'R$ 689,00','R$ 731,50','R$ 655,00','R$ 700,00','Vigiando','ok'],
+ ['Seiko 5 SNK809','Ref. SNK809K2 · automático · 37 mm',['AliExpress','ML'],'R$ 748,00','R$ 792,00','R$ 705,00','—','Vigiando','ok'],
+ ['Technos Golf 2115','Ref. 2115KZS/1P · quartzo · 44 mm',['Shopee','ML'],'R$ 358,40','R$ 372,00','R$ 331,00','R$ 340,00','Vigiando','ok'],
+ ['Citizen Eco-Drive BM8180','Ref. BM8180-03E · solar · 37 mm',['AliExpress'],'R$ 1.129,00','R$ 1.210,00','R$ 1.098,00','—','Vigiando','ok'],
+ ['Mondaine 32703','Ref. 32703L0MVNE1 · quartzo · 38 mm',['Shopee'],'R$ 229,90','R$ 246,00','R$ 219,90','R$ 230,00','Pausado',''],
+ ['Orient F49SS031','Ref. F49SS031 · automático · 41 mm',['ML'],'R$ 1.499,00','R$ 1.452,00','R$ 1.380,00','R$ 1.350,00','Vigiando','ok']
+];
+SCREENS['03 Catálogo vigiado'] = `<div class="frame" style="height:1024px"><div class="app">${side('Catálogo')}<div class="main">
+  ${topBar('Catálogo vigiado','318 relógios · 695 anúncios vinculados','<div class="row"><span class="btn ghost">Importar CSV</span><span class="btn">Adicionar relógio</span></div>')}
+  <div class="row"><span class="input" style="width:380px">Buscar por marca, modelo ou referência</span>
+    ${['Marca: todas','Marketplace: todos','Status: vigiando','Movimento: todos'].map(f=>`<span class="pill">${f}</span>`).join('')}</div>
+  <div class="tbl">
+    <div class="th"><span style="width:300px">Relógio</span><span style="width:170px">Lojas</span><span style="width:140px">Preço atual</span><span style="width:140px">Média 30 d</span><span style="width:130px">Menor 90 d</span><span style="width:110px">Alvo</span><span style="width:94px">Status</span></div>
+    ${CAT.map(r=>`<div class="tr"><span style="width:300px"><b>${r[0]}</b><small>${r[1]}</small></span>
+      <span style="width:170px">${r[2].map(mk).join(' ')}</span>
+      <span style="width:140px"><b>${r[3]}</b></span><span style="width:140px">${r[4]}</span><span style="width:130px">${r[5]}</span><span style="width:110px">${r[6]}</span>
+      <span style="width:94px"><span class="chip ${r[8]}">${r[7]}</span></span></div>`).join('')}
+  </div>
+</div></div></div>`;
+
+const CASH_04 = genDailySeries(365, 612, 760, 1001, 22);
+const INST_04 = CASH_04.map(p=>Math.round(p*1.06));
+SCREENS['04 Relógio — detalhe'] = `<div class="frame" style="height:1024px"><div class="app">${side('Catálogo')}<div class="main">
+  <div class="muted">Catálogo › Orient MBSS1154</div>
+  ${topBar('Orient MBSS1154','<span class="chip">Ref. MBSS1154</span> <span class="chip">EAN 7899999123456</span> <span class="chip">Automático · 42 mm</span> <span class="chip ok">Vigiando</span>','<div class="row"><span class="btn ghost">Pausar vigilância</span><span class="btn ghost">Editar</span></div>')}
+  <div class="row" style="align-items:flex-start;gap:16px">
+    <div style="flex:1;display:flex;flex-direction:column;gap:16px;min-width:0">
+      ${priceCardHTML(CASH_04, INST_04, 660, 210, 90)}
+      <div class="card"><h3>Anúncios vinculados</h3>
+        <div class="row muted"><span style="width:150px">Loja</span><span style="width:180px">Vendedor</span><span style="width:120px">À vista</span><span style="width:110px">Frete</span><span style="width:110px">Atualizado</span></div>
+        ${[['Shopee','Orient Oficial','R$ 612,90','Grátis','há 12 min'],['Mercado Livre','Eclock (loja oficial)','R$ 639,00','R$ 21,90','há 18 min'],['AliExpress','Watch Store BR','R$ 658,40','Grátis','há 41 min']]
+          .map(a=>`<div class="row" style="border-top:1px solid var(--bord);padding-top:10px"><span style="width:150px">${mk(a[0])}</span><span class="sec" style="width:180px">${a[1]}</span><span style="width:120px;font-weight:500">${a[2]}</span><span class="sec" style="width:110px">${a[3]}</span><span class="muted" style="width:110px">${a[4]}</span></div>`).join('')}
+      </div>
+    </div>
+    <div style="width:320px;display:flex;flex-direction:column;gap:16px;flex:none">
+      <div class="card"><h3>Resumo</h3>
+        ${[['Preço efetivo hoje','R$ 612,90','var(--txt)'],['Média 30 dias','R$ 689,00','var(--sec)'],['Menor preço 90 dias','R$ 598,00','var(--sec)'],['Preço-alvo','R$ 620,00','var(--sec)'],['Queda vs. média','11,0%','var(--ok)']]
+          .map(r=>`<div class="between"><span class="muted">${r[0]}</span><span style="font-size:14px;font-weight:500;color:${r[2]}">${r[1]}</span></div>`).join('')}
+      </div>
+      <div class="card"><h3>Regra aplicada</h3>
+        <div class="sec">Alerta quando o preço efetivo cair 8% ou mais abaixo da média de 30 dias, ou bater o preço-alvo.</div>
+        <div class="banner" style="background:var(--okSoft);color:var(--ok)">Candidato gerado hoje às 09:12 e aguardando revisão.</div>
+        <div class="banner" style="background:var(--elev);color:var(--muted)">Amazon não vigiada: histórico e alerta bloqueados até a aprovação.</div>
+      </div>
+    </div>
+  </div>
+</div></div></div>`;
+
+const CANDS=[['92','Casio G-Shock GA-2100','Shopee','R$ 689,00','-11,6% vs. média','há 8 min',true],['88','Orient MBSS1154','Shopee','R$ 612,90','-11,0% vs. média','há 14 min',false],['81','Seiko 5 SNK809','AliExpress','R$ 705,00','menor preço em 90 d','há 32 min',false],['74','Technos Golf 2115','Mercado Livre','R$ 331,00','-8,4% vs. média','há 1 h',false],['69','Mondaine 32703','Shopee','R$ 219,90','preço-alvo atingido','há 2 h',false]];
+SCREENS['05 Fila de revisão'] = `<div class="frame" style="height:1024px"><div class="app">${side('Fila de revisão')}<div class="main">
+  ${topBar('Fila de revisão','12 candidatos · ordenados por pontuação · nada é publicado sem aprovação','<span class="pill">Ordenar: maior pontuação</span>')}
+  <div class="row" style="align-items:flex-start;gap:16px">
+    <div style="width:400px;display:flex;flex-direction:column;gap:10px;flex:none">
+      ${CANDS.map(c=>`<div style="display:flex;gap:12px;padding:14px;border-radius:12px;background:${c[6]?'var(--accSoft)':'var(--surf)'};border:1px solid ${c[6]?'var(--acc)':'var(--bord)'}">
+        <div style="width:44px;height:44px;border-radius:10px;background:var(--elev);display:flex;align-items:center;justify-content:center;font-weight:600;color:var(--acc);flex:none">${c[0]}</div>
+        <div><b style="font-size:14px;font-weight:500">${c[1]}</b>
+          <div class="row" style="margin-top:4px">${mk(c[2])}<b style="font-size:13px;font-weight:500">${c[3]}</b></div>
+          <div class="row" style="margin-top:4px"><span class="chip ok">${c[4]}</span><span class="muted">${c[5]}</span></div>
+        </div></div>`).join('')}
+    </div>
+    <div style="flex:1;display:flex;flex-direction:column;gap:16px;min-width:0">
+      <div class="card"><div class="between"><h3>Pré-visualização do post</h3><span class="chip acc">Pontuação 92</span></div>
+        <div class="row" style="align-items:flex-start;gap:14px;padding:16px;border-radius:12px;background:var(--input)">
+          <div class="ph" style="width:96px;height:96px;flex:none"></div>
+          <div><b style="font-weight:500">Casio G-Shock GA-2100-1A1 — 45 mm, resistente a 200 m</b>
+            <div class="big" style="margin-top:4px">R$ 689,00 à vista · 12x de R$ 63,80</div>
+            <div class="sec">11,6% abaixo da média de 30 dias (R$ 779,90) · menor preço desde julho</div>
+            <div class="sec">Cupom CASIO10 · Shopee · vendedor Casio Oficial</div>
+            <div class="muted">Link de afiliado. Preço e cupom podem mudar. Consultado em 21/09/2026 às 09:12.</div>
+          </div></div>
+      </div>
+      <div class="card"><h3>Checagens antes de publicar</h3>
+        ${[['Cupom CASIO10 testado no carrinho hoje','ok'],['Vendedor é loja oficial da marca','ok'],['Em estoque e com frete para todo o Brasil','ok'],['Preço “de” da loja é maior que a média — não usar na mensagem','warn']]
+          .map(c=>`<div class="banner" style="background:var(--${c[1]}Soft);color:var(--sec)">● ${c[0]}</div>`).join('')}
+      </div>
+      <div class="row"><span class="btn block" style="flex:1">Aprovar e publicar</span><span class="btn ghost">Editar texto</span><span class="btn ghost">Descartar</span></div>
+      <div class="banner" style="background:var(--elev);color:var(--muted)">A aprovação fica registrada com operador, data, valores e link usados (RF30).</div>
+    </div>
+  </div>
+</div></div></div>`;
+
+const CUP=[['CASIO10','Shopee','10% acima de R$ 300, só relógios','30/09/2026','hoje, 08:40','Testado','ok'],['RELOGIO15','Mercado Livre','15% até R$ 120 de desconto','21/09/2026','ontem, 19:02','Vence hoje','warn'],['ALI50','AliExpress','R$ 50 acima de R$ 400','15/10/2026','há 3 dias','Testado','ok'],['PRIMEIRA20','Shopee','20% na primeira compra do usuário','contínuo','há 6 dias','Revisar','warn'],['SETEMBRO25','Mercado Livre','R$ 25 acima de R$ 199','18/09/2026','há 8 dias','Expirado','dang']];
+SCREENS['06 Cupons'] = `<div class="frame" style="height:1024px"><div class="app">${side('Cupons')}<div class="main">
+  ${topBar('Cupons','24 cupons cadastrados · 3 vencem nesta semana','<span class="btn">Adicionar cupom</span>')}
+  <div class="tbl"><div class="th"><span style="width:150px">Código</span><span style="width:150px">Loja</span><span style="width:290px">Regra</span><span style="width:140px">Validade</span><span style="width:150px">Último teste</span><span style="width:110px">Status</span></div>
+  ${CUP.map(c=>`<div class="tr"><span style="width:150px"><span class="chip acc">${c[0]}</span></span><span style="width:150px">${mk(c[1])}</span><span style="width:290px">${c[2]}</span><span style="width:140px">${c[3]}</span><span class="muted" style="width:150px">${c[4]}</span><span style="width:110px"><span class="chip ${c[6]}">${c[5]}</span></span></div>`).join('')}</div>
+</div></div></div>`;
+
+const POSTS=[['Seiko 5 SNK809','20/09 às 10:12','AliExpress','R$ 705,00','412','9','R$ 254,00','Ativo','ok'],['Technos Golf 2115','20/09 às 08:03','Mercado Livre','R$ 331,00','287','6','R$ 158,80','Ativo','ok'],['Casio MQ-24','19/09 às 17:45','Shopee','R$ 89,90','654','21','R$ 94,30','Preço subiu','warn'],['Orient F49SS031','19/09 às 11:20','Mercado Livre','R$ 1.350,00','198','2','R$ 216,00','Sem estoque','dang'],['Mondaine 32703','18/09 às 09:30','Shopee','R$ 219,90','321','7','R$ 61,50','Encerrado','']];
+SCREENS['07 Posts publicados'] = `<div class="frame" style="height:1024px"><div class="app">${side('Posts')}<div class="main">
+  ${topBar('Posts publicados','84 posts nos últimos 30 dias · 2 precisam de encerramento','')}
+  <div class="tbl"><div class="th"><span style="width:260px">Relógio</span><span style="width:140px">Loja</span><span style="width:140px">Preço publicado</span><span style="width:110px">Cliques</span><span style="width:110px">Vendas</span><span style="width:130px">Comissão</span><span style="width:140px">Status</span></div>
+  ${POSTS.map(p=>`<div class="tr"><span style="width:260px"><b>${p[0]}</b><small>${p[1]}</small></span><span style="width:140px">${mk(p[2])}</span><span style="width:140px"><b>${p[3]}</b></span><span style="width:110px">${p[4]}</span><span style="width:110px">${p[5]}</span><span style="width:130px;color:var(--ok);font-weight:500">${p[6]}</span><span style="width:140px"><span class="chip ${p[8]}">${p[7]}</span></span></div>`).join('')}</div>
+  <div class="banner" style="background:var(--warnSoft);color:var(--warn);font-weight:500;font-size:13px">2 posts saíram do preço publicado. Edite a mensagem ou encerre o post no canal (RF25).</div>
+</div></div></div>`;
+
+const MKS=[['Shopee','--shopee','Conectado','ok','Coleta a cada 30 min · credencial válida',[1,1,1],false],['AliExpress','--ali','Conectado','ok','Coleta a cada 45 min · cookie de 3 dias',[1,1,1],false],['Mercado Livre','--ml','Token expira em 3 dias','warn','Coleta a cada 30 min · sem encurtador de link',[1,1,1],false],['Amazon','--amz','Aguardando aprovação','dang','Cache de 24 h · exige carimbo de data e hora no preço',[0,0,0],true]];
+SCREENS['08 Configurações'] = `<div class="frame" style="height:1275px"><div class="app">${side('Configurações')}<div class="main">
+  <div><h1 style="margin:0;font-size:24px;font-weight:600">Configurações</h1><div class="sub sec">Permissões e limiares são editados aqui, sem alterar o código (RF29).</div></div>
+  <div class="row">${['Marketplaces','Regras de alerta','Canal','Operadores'].map((t,i)=>`<span class="chip ${i===0?'acc':''}" style="padding:9px 14px;font-size:13px">${t}</span>`).join('')}</div>
+  <div class="row" style="align-items:flex-start;gap:16px">
+    <div style="flex:1;display:flex;flex-direction:column;gap:16px;min-width:0">
+      ${MKS.map(m=>`<div class="card"><div class="between"><div class="row"><i style="width:10px;height:10px;border-radius:50%;background:var(${m[1]})"></i><h3>${m[0]}</h3></div><span class="chip ${m[3]}">${m[2]}</span></div>
+        <div class="muted">${m[4]}</div>
+        ${['Guardar histórico de preços','Gerar alerta de queda','Publicar no Telegram'].map((p,i)=>`<div class="between"><span class="${m[6]?'muted':'sec'}" style="font-size:13px">${p}</span><span class="tog ${m[6]?'lock':(m[5][i]?'on':'')}"><i></i></span></div>`).join('')}
+        ${m[6]?'<div class="banner" style="background:var(--dangSoft);color:var(--dang);font-weight:500">Histórico e alerta ficam desligados até a Amazon aprovar por escrito.</div>':''}
+      </div>`).join('')}
+    </div>
+    <div style="width:380px;display:flex;flex-direction:column;gap:16px;flex:none">
+      <div class="card"><h3>Regras de alerta</h3>
+        ${[['Queda mínima vs. média de 30 dias','8%'],['Janela do menor preço','90 dias'],['Intervalo sem repetir o mesmo relógio','24 h'],['Pontuação mínima para entrar na fila','60'],['Frete somado ao preço efetivo','Sim']]
+          .map(r=>`<div class="between"><span class="sec">${r[0]}</span><span class="input" style="font-weight:500;color:var(--txt)">${r[1]}</span></div>`).join('')}
+      </div>
+      <div class="card"><h3>Publicação</h3>
+        ${[['Exigir aprovação humana',1],['Publicar sozinho acima de 90 pontos',0],['Incluir aviso de afiliado',1],['Incluir carimbo de data e hora',1]]
+          .map(r=>`<div class="between"><span class="sec" style="font-size:13px">${r[0]}</span><span class="tog ${r[1]?'on':''}"><i></i></span></div>`).join('')}
+      </div>
+    </div>
+  </div>
+</div></div></div>`;
+
+const OFF=[['Casio G-Shock GA-2100-1A1','45 mm · quartzo · 200 m · resina','R$ 689,00','12x de R$ 63,80','Shopee','CASIO10','11,6% abaixo da média','há 8 min'],
+['Orient MBSS1154','42 mm · automático · 100 m · aço','R$ 612,90','10x de R$ 61,29','Shopee','','11,0% abaixo da média','há 22 min'],
+['Seiko 5 SNK809K2','37 mm · automático · 30 m · nylon','R$ 705,00','12x de R$ 65,30','AliExpress','ALI50','menor preço em 90 dias','há 41 min'],
+['Technos Golf 2115KZS','44 mm · quartzo · 50 m · aço','R$ 331,00','8x de R$ 41,37','Mercado Livre','RELOGIO15','8,4% abaixo da média','há 1 h'],
+['Citizen Eco-Drive BM8180','37 mm · solar · 100 m · nylon','R$ 1.098,00','12x de R$ 101,70','AliExpress','','menor preço em 90 dias','há 2 h'],
+['Mondaine 32703L0MVNE1','38 mm · quartzo · 30 m · couro','R$ 219,90','6x de R$ 36,65','Shopee','PRIMEIRA20','preço-alvo atingido','há 3 h'],
+['Casio MQ-24-7B2','35 mm · quartzo · 30 m · resina','R$ 89,90','3x de R$ 29,96','Shopee','','9,2% abaixo da média','há 5 h'],
+['Orient F49SS031','41 mm · automático · 50 m · aço','R$ 1.350,00','12x de R$ 125,00','Mercado Livre','SETEMBRO25','7,1% abaixo da média','há 8 h']];
+SCREENS['09 Site público (fase 2)'] = `<div class="frame site" style="height:1180px">
+  <div class="sHead"><div class="brand"><i class="logo" style="width:24px;height:24px"></i>Pulso Promos</div>
+    <nav class="sNav">${['Promoções','Marcas','Automáticos','Comunidades','Histórico de preço'].map((n,i)=>`<span style="${i===0?'color:var(--txt);font-weight:500':''}">${n}</span>`).join('')}</nav>
+    <div class="row" style="gap:16px">
+      <span class="input" style="width:220px">Buscar relógio…</span>
+      <details class="avatarDD"><summary><i class="avImg"></i>▾</summary>
+        <div class="menu"><a>Perfil</a><a>Favoritos</a></div>
+      </details>
+    </div></div>
+  <div class="sBody">
+    <div class="between"><div><h1 style="margin:0;font-size:26px;font-weight:600">Promoções de relógios</h1><div class="sec">Feed de publicações, mais recente primeiro — cada oferta é comparada com o histórico de preço dos últimos 90 dias antes de ir ao ar.</div></div><span class="btn">Entrar no canal do Telegram</span></div>
+    <div class="row">${['Todos','Automáticos','Quartzo','Até R$ 500','R$ 500 a R$ 1.500','Menor preço em 90 dias'].map((f,i)=>`<span class="pill" style="border-radius:20px;${i===0?'background:var(--accSoft);border-color:var(--acc);color:var(--acc)':''}">${f}</span>`).join('')}</div>
+    <div class="offers">${OFF.map(o=>`<div class="offer"><div class="ph img"></div>
+      <div class="row">${mkBest(o[4])}</div>
+      <h4>${o[0]}</h4><div class="muted">${o[1]}</div>
+      <div><div style="font-size:20px;font-weight:600">${o[2]} <span style="font-size:12px;font-weight:500;color:var(--muted)">à vista</span></div><div class="sec" style="margin-top:2px">${o[3]} <span class="muted" style="font-size:11px">· parcelado</span></div></div>
+      ${o[5]?`<div class="couponWrap" style="display:block">
+        <span class="btn ghost block" style="color:var(--warn);border-color:var(--bStrong)" onclick="pulsoCouponToggle(this,true)">Ver cupom disponível</span>
+        <div class="couponModalBackdrop" onclick="pulsoCouponBackdropClick(event,this)">
+          <div class="couponModal" onclick="event.stopPropagation()">
+            <div class="between"><h3>Cupom disponível</h3><span class="modalClose" onclick="pulsoCouponToggle(this,false)">✕</span></div>
+            <div class="couponCode" onclick="pulsoCopyCoupon(this)"><span class="couponCodeText">${o[5]}</span><span class="copyHint">Copiar</span></div>
+            <div class="couponNote">Copie o código e cole no carrinho de compras antes de finalizar seu pedido na loja.</div>
+            <div class="couponWarn">Os cupons podem estar sujeitos à validação e é possível que alguns não funcionem. Teste o código no processo de checkout antes de finalizar a compra.</div>
+            <span class="btn block" onclick="pulsoCouponToggle(this,false)">Entendi</span>
+          </div>
+        </div>
+      </div>`:''}
+      <div class="btn block">Acessar</div>
+      <div class="muted" style="font-size:11px">${o[7]}</div>
+    </div>`).join('')}</div>
+    <div class="banner" style="background:var(--surf);border:1px solid var(--bord);color:var(--muted)">Os links desta página são de afiliado: se você comprar por eles, recebemos uma comissão da loja, sem custo extra para você. Preços e cupons podem mudar; o valor válido é o da loja no momento da compra.</div>
+  </div>
+</div>`;
+
+const CASH_12 = genDailySeries(365, 689, 840, 2002, 24);
+const INST_12 = CASH_12.map(p=>Math.round(p*1.06));
+const HAS_COUPON_12 = true; // nem todo produto tem cupom — quando não tem, este bloco inteiro some
+const COUPON_CODE_12 = 'CASIO10';
+const STORES_12 = [
+  ['Shopee','marketplace/shopee','689,00','Casio Oficial · loja oficial da marca','ok',true],
+  ['AliExpress','marketplace/aliexpress','699,90','Vendedor não oficial · poucas vendas monitoradas','warn',false],
+  ['Mercado Livre','marketplace/mercadolivre','712,40','Loja oficial (Eclock) · sem reclamações no histórico','ok',false]
+];
+SCREENS['12 Produto — detalhe (site público)'] = `<div class="frame site" style="height:1520px">
+  <div class="sHead"><div class="brand"><i class="logo" style="width:24px;height:24px"></i>Pulso Promos</div>
+    <nav class="sNav">${['Promoções','Marcas','Automáticos','Comunidades','Histórico de preço'].map(n=>`<span>${n}</span>`).join('')}</nav>
+    <div class="row" style="gap:16px"><span class="input" style="width:220px">Buscar relógio…</span>
+      <details class="avatarDD"><summary><i class="avImg"></i>▾</summary><div class="menu"><a>Perfil</a><a>Favoritos</a></div></details>
+    </div></div>
+  <div class="sBody">
+    <div class="muted">Promoções › Relógios › Casio G-Shock GA-2100-1A1</div>
+    <div class="pTop">
+      <div class="ph pImg"></div>
+      <div class="pInfo">
+        <div class="row">${mkBest('Shopee')}<span class="chip ok">11,6% abaixo da média</span></div>
+        <div><div style="font-size:26px;font-weight:600">Casio G-Shock GA-2100-1A1</div><div class="sec">45 mm · quartzo · 200 m · resina</div></div>
+        <div class="row" style="gap:8px">
+          <span class="btn" onclick="pulsoSetPriceMode(this,'cash')">À vista</span>
+          <span class="btn ghost" onclick="pulsoSetPriceMode(this,'inst')">Parcelado</span>
+        </div>
+        <div class="priceDisplay" data-cash="689,00" data-inst-total="730,00" data-inst-n="12" data-inst-each="60,83">
+          <div class="bigPrice" style="font-size:30px;font-weight:600;color:var(--ok)">R$ 689,00</div>
+          <div class="priceSub sec"></div>
+        </div>
+        ${HAS_COUPON_12 ? `<div class="couponWrap">
+          <span class="btn ghost" onclick="pulsoCouponToggle(this,true)">Ver cupom disponível</span>
+          <div class="couponModalBackdrop" onclick="pulsoCouponBackdropClick(event,this)">
+            <div class="couponModal" onclick="event.stopPropagation()">
+              <div class="between"><h3>Cupom disponível</h3><span class="modalClose" onclick="pulsoCouponToggle(this,false)">✕</span></div>
+              <div class="couponCode" onclick="pulsoCopyCoupon(this)"><span class="couponCodeText">${COUPON_CODE_12}</span><span class="copyHint">Copiar</span></div>
+              <div class="couponNote">Copie o código e cole no carrinho de compras antes de finalizar seu pedido na loja.</div>
+              <div class="couponWarn">Os cupons podem estar sujeitos à validação e é possível que alguns não funcionem. Teste o código no processo de checkout antes de finalizar a compra.</div>
+              <span class="btn block" onclick="pulsoCouponToggle(this,false)">Entendi</span>
+            </div>
+          </div>
+        </div>` : ''}
+        <div class="pActions"><span class="btn block" style="flex:1">Acessar</span>${authModalBlock()}</div>
+        <div class="muted">Link de afiliado. Preço e cupom podem mudar; o valor válido é o da loja.</div>
+      </div>
+    </div>
+    <div class="section">
+      <h2 class="sectionTitle">Histórico de preços</h2>
+      <div class="histGrid">
+        ${priceCardHTML(CASH_12, INST_12, 760, 330, 90, {withTitle:false})}
+        <div class="card">
+          <h3>Outras lojas com este relógio</h3>
+          <div class="sec">Veja o preço nas lojas que vendem este relógio agora. A de melhor preço é a mesma que abre no botão "Acessar", no topo.</div>
+          <div class="storesScroll">
+            ${STORES_12.map(s=>`<div class="storeRow${s[5]?' best':''}">
+              
+              <div class="ph" style="height:100px;border-radius:8px"></div>
+              <div class="between">${s[5]?mkBest(s[0]):mk(s[0])}<b style="font-size:16px;font-weight:600">R$ ${s[2]}</b></div>
+              <div class="row" style="gap:6px"><span style="color:var(--${s[4]});font-size:10px">●</span><span class="muted" style="font-size:12px">${s[3]}</span></div>
+              <span class="${s[5]?'btn':'btn ghost'} block">Acessar</span>
+            </div>`).join('')}
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="section">
+      <h2 class="sectionTitle">Especificações</h2>
+      <div class="card">
+        <div class="specsGrid">
+          <div>${[['Referência','GA-2100-1A1'],['Movimento','Quartzo'],['Caixa','45 mm, resina']].map(r=>`<div class="specsRow"><span class="muted">${r[0]}</span><b style="font-weight:500">${r[1]}</b></div>`).join('')}</div>
+          <div>${[['Resistência à água','200 m'],['Pulseira','Resina'],['Garantia da loja','12 meses']].map(r=>`<div class="specsRow"><span class="muted">${r[0]}</span><b style="font-weight:500">${r[1]}</b></div>`).join('')}</div>
+        </div>
+      </div>
+    </div>
+    <div class="section">
+      <h2 class="sectionTitle">Prós e contras</h2>
+      <div class="card">
+      <div class="pcGrid">
+        <div class="pcCol"><b style="color:var(--ok)">Prós</b>
+          ${['Resistente a impactos e água até 200 m','Visor grande, fácil de ler no escuro','Preço bem abaixo da média da categoria'].map(t=>`<div class="pcItem"><span style="color:var(--ok);font-weight:600">+</span>${t}</div>`).join('')}
+        </div>
+        <div class="pcCol"><b style="color:var(--dang)">Contras</b>
+          ${['Pulseira de resina, não é de metal','Sem GPS nem conexão por app'].map(t=>`<div class="pcItem"><span style="color:var(--dang);font-weight:600">–</span>${t}</div>`).join('')}
+        </div>
+      </div>
+      </div>
+    </div>
+    <div class="section">
+      <h2 class="sectionTitle">Vídeo explicativo <span class="chip" style="margin-left:6px">em breve</span></h2>
+      <div class="videoCard"><span class="muted">Este espaço vai trazer um vídeo já existente sobre o produto. Ainda não faz parte desta fase (RF41).</span></div>
+    </div>
+  </div>
+</div>`;
+
+SCREENS['12b Publicação — detalhe (site público)'] = `<div class="frame site" style="height:1560px">
+  <div class="sHead"><div class="brand"><i class="logo" style="width:24px;height:24px"></i>Pulso Promos</div>
+    <nav class="sNav">${['Promoções','Marcas','Automáticos','Comunidades','Histórico de preço'].map(n=>`<span>${n}</span>`).join('')}</nav>
+    <div class="row" style="gap:16px"><span class="input" style="width:220px">Buscar relógio…</span>
+      <details class="avatarDD"><summary><i class="avImg"></i>▾</summary><div class="menu"><a>Perfil</a><a>Favoritos</a></div></details>
+    </div></div>
+  <div class="sBody">
+    <div class="muted">Promoções › Relógios › Casio G-Shock GA-2100-1A1</div>
+    <div class="between" style="margin-top:-4px">
+      <span class="chip acc">Publicação · há 8 min</span>
+    </div>
+    <div class="pTop">
+      <div class="ph pImg"></div>
+      <div class="pInfo">
+        <div class="row">${mkBest('Shopee')}<span class="chip ok">11,6% abaixo da média</span></div>
+        <div><div style="font-size:26px;font-weight:600">Casio G-Shock GA-2100-1A1</div><div class="sec">45 mm · quartzo · 200 m · resina</div></div>
+        <div class="row" style="gap:8px">
+          <span class="btn" onclick="pulsoSetPriceMode(this,'cash')">À vista</span>
+          <span class="btn ghost" onclick="pulsoSetPriceMode(this,'inst')">Parcelado</span>
+        </div>
+        <div class="priceDisplay" data-cash="689,00" data-inst-total="730,00" data-inst-n="12" data-inst-each="60,83">
+          <div class="bigPrice" style="font-size:30px;font-weight:600;color:var(--ok)">R$ 689,00</div>
+          <div class="priceSub sec"></div>
+        </div>
+        ${HAS_COUPON_12 ? `<div class="couponWrap">
+          <span class="btn ghost" onclick="pulsoCouponToggle(this,true)">Ver cupom disponível</span>
+          <div class="couponModalBackdrop" onclick="pulsoCouponBackdropClick(event,this)">
+            <div class="couponModal" onclick="event.stopPropagation()">
+              <div class="between"><h3>Cupom disponível</h3><span class="modalClose" onclick="pulsoCouponToggle(this,false)">✕</span></div>
+              <div class="couponCode" onclick="pulsoCopyCoupon(this)"><span class="couponCodeText">${COUPON_CODE_12}</span><span class="copyHint">Copiar</span></div>
+              <div class="couponNote">Copie o código e cole no carrinho de compras antes de finalizar seu pedido na loja.</div>
+              <div class="couponWarn">Os cupons podem estar sujeitos à validação e é possível que alguns não funcionem. Teste o código no processo de checkout antes de finalizar a compra.</div>
+              <span class="btn block" onclick="pulsoCouponToggle(this,false)">Entendi</span>
+            </div>
+          </div>
+        </div>` : ''}
+        <div class="pActions"><span class="btn block" style="flex:1">Acessar</span>${authModalBlock()}</div>
+        <span class="btn ghost block" style="margin-top:10px">Visualizar produto</span>
+        <div class="muted" style="margin-top:10px">Preço e loja desta publicação, de há 8 min. O preço mais barato agora pode ser outro — veja em "Visualizar produto".</div>
+      </div>
+    </div>
+    <div class="section">
+      <h2 class="sectionTitle">Histórico de preços</h2>
+      <div class="histGrid">
+        ${priceCardHTML(CASH_12, INST_12, 760, 330, 90, {withTitle:false})}
+        <div class="card">
+          <h3>Outras lojas com este relógio</h3>
+          <div class="sec">Veja o preço nas lojas que vendem este relógio agora. A de melhor preço é a mesma que abre no botão "Visualizar produto", acima.</div>
+          <div class="storesScroll">
+            ${STORES_12.map(s=>`<div class="storeRow${s[5]?' best':''}">
+              
+              <div class="ph" style="height:100px;border-radius:8px"></div>
+              <div class="between">${s[5]?mkBest(s[0]):mk(s[0])}<b style="font-size:16px;font-weight:600">R$ ${s[2]}</b></div>
+              <div class="row" style="gap:6px"><span style="color:var(--${s[4]});font-size:10px">●</span><span class="muted" style="font-size:12px">${s[3]}</span></div>
+              <span class="${s[5]?'btn':'btn ghost'} block">Acessar</span>
+            </div>`).join('')}
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="section">
+      <h2 class="sectionTitle">Especificações</h2>
+      <div class="card">
+        <div class="specsGrid">
+          <div>${[['Referência','GA-2100-1A1'],['Movimento','Quartzo'],['Caixa','45 mm, resina']].map(r=>`<div class="specsRow"><span class="muted">${r[0]}</span><b style="font-weight:500">${r[1]}</b></div>`).join('')}</div>
+          <div>${[['Resistência à água','200 m'],['Pulseira','Resina'],['Garantia da loja','12 meses']].map(r=>`<div class="specsRow"><span class="muted">${r[0]}</span><b style="font-weight:500">${r[1]}</b></div>`).join('')}</div>
+        </div>
+      </div>
+    </div>
+    <div class="section">
+      <h2 class="sectionTitle">Prós e contras</h2>
+      <div class="card">
+      <div class="pcGrid">
+        <div class="pcCol"><b style="color:var(--ok)">Prós</b>
+          ${['Resistente a impactos e água até 200 m','Visor grande, fácil de ler no escuro','Preço bem abaixo da média da categoria'].map(t=>`<div class="pcItem"><span style="color:var(--ok);font-weight:600">+</span>${t}</div>`).join('')}
+        </div>
+        <div class="pcCol"><b style="color:var(--dang)">Contras</b>
+          ${['Pulseira de resina, não é de metal','Sem GPS nem conexão por app'].map(t=>`<div class="pcItem"><span style="color:var(--dang);font-weight:600">–</span>${t}</div>`).join('')}
+        </div>
+      </div>
+      </div>
+    </div>
+  </div>
+</div>`;
+
+const FAV=[['Casio G-Shock GA-2100-1A1','R$ 689,00','Shopee','12x de R$ 63,80'],['Orient MBSS1154','R$ 612,90','Shopee','10x de R$ 61,29'],['Seiko 5 SNK809K2','R$ 705,00','AliExpress','12x de R$ 65,30'],['Technos Golf 2115KZS','R$ 331,00','Mercado Livre','8x de R$ 41,37']];
+SCREENS['13 Perfil e favoritos (site público)'] = `<div class="frame site" style="height:900px">
+  <div class="sHead"><div class="brand"><i class="logo" style="width:24px;height:24px"></i>Pulso Promos</div>
+    <nav class="sNav">${['Promoções','Marcas','Automáticos','Comunidades','Histórico de preço'].map(n=>`<span>${n}</span>`).join('')}</nav>
+    <div class="row" style="gap:16px"><span class="input" style="width:220px">Buscar relógio…</span>
+      <details class="avatarDD" open><summary><i class="avImg"></i>▾</summary><div class="menu"><a>Perfil</a><a style="color:var(--acc);font-weight:500">Favoritos</a></div></details>
+    </div></div>
+  <div class="sBody">
+    <div class="favWrap">
+      <div class="profCard">
+        <i class="profAv"></i>
+        <div><b style="font-size:15px;font-weight:600">Ana Souza</b><div class="muted">ana.souza@gmail.com</div></div>
+        <span class="chip">Conta pelo Google</span>
+        <div class="favTabs"><span>Perfil</span><span class="on">Favoritos</span></div>
+        <span class="btn ghost block">Sair da conta</span>
+      </div>
+      <div style="flex:1">
+        <div style="font-size:18px;font-weight:600;margin-bottom:14px">Meus favoritos · 4 relógios</div>
+        <div class="favGrid">
+          ${FAV.map(f=>`<div class="favCard"><div class="ph favImg"></div>
+            <div class="between">${mkBest(f[2])}<span class="heart">♥</span></div>
+            <b style="font-size:14px;font-weight:500">${f[0]}</b>
+            <div style="font-size:18px;font-weight:600">${f[1]} <span style="font-size:11px;font-weight:500;color:var(--muted)">à vista</span></div>
+            <div class="sec" style="font-size:12px;margin-top:-6px">${f[3]} <span class="muted" style="font-size:10px">· parcelado</span></div>
+          </div>`).join('')}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>`;
+
+// ---------- reaproveitáveis entre os 3 conceitos luxury ----------
+function authModalBlock(){
+  return `<div class="authWrap" style="display:inline-block">
+    <span class="btn ghost" onclick="pulsoAuthToggle(this,true)">♥ Favoritar</span>
+    <div class="authModalBackdrop" onclick="pulsoAuthBackdropClick(event,this)">
+      <div class="authModal" onclick="event.stopPropagation()">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px">
+          <h3>Faça login para aproveitar o melhor do mundo dos relógios</h3>
+          <span class="modalClose" style="cursor:pointer;flex:none" onclick="pulsoAuthToggle(this,false)">✕</span>
+        </div>
+        <div class="sec" style="font-size:13px;margin-top:-8px">Acesse sua conta e descubra uma experiência exclusiva pensada para quem ama relógios.</div>
+        <div class="authBenefitBox">
+          <div class="authBenefitRow"><span class="authBenefitIcon">♥</span><span>Lista de favoritos</span></div>
+        </div>
+        <span class="btn block" onclick="pulsoAuthToggle(this,false)">Fazer login agora →</span>
+        <span class="btn ghost block" onclick="pulsoAuthToggle(this,false)">Deixar para depois</span>
+      </div>
+    </div>
+  </div>`;
+}
+function couponBlock(code){
+  return `<div class="couponWrap" style="display:block">
+    <span class="btn ghost block" onclick="pulsoCouponToggle(this,true)">Ver cupom disponível</span>
+    <div class="couponModalBackdrop" onclick="pulsoCouponBackdropClick(event,this)">
+      <div class="couponModal" onclick="event.stopPropagation()">
+        <div class="between"><h3>Cupom disponível</h3><span class="modalClose" onclick="pulsoCouponToggle(this,false)">✕</span></div>
+        <div class="couponCode" onclick="pulsoCopyCoupon(this)"><span class="couponCodeText">${code}</span><span class="copyHint">Copiar</span></div>
+        <div class="couponNote">Copie o código e cole no carrinho de compras antes de finalizar seu pedido na loja.</div>
+        <div class="couponWarn">Os cupons podem estar sujeitos à validação e é possível que alguns não funcionem. Teste o código no processo de checkout antes de finalizar a compra.</div>
+        <span class="btn block" onclick="pulsoCouponToggle(this,false)">Entendi</span>
+      </div>
+    </div>
+  </div>`;
+}
+function specsBlock(){
+  return `<div class="specsGrid">
+    <div>${[['Referência','GA-2100-1A1'],['Movimento','Quartzo'],['Caixa','45 mm, resina']].map(r=>`<div class="specsRow"><span class="muted">${r[0]}</span><b style="font-weight:500">${r[1]}</b></div>`).join('')}</div>
+    <div>${[['Resistência à água','200 m'],['Pulseira','Resina'],['Garantia da loja','12 meses']].map(r=>`<div class="specsRow"><span class="muted">${r[0]}</span><b style="font-weight:500">${r[1]}</b></div>`).join('')}</div>
+  </div>`;
+}
+function prosConsBlock(){
+  return `<div class="pcGrid">
+    <div class="pcCol"><b style="color:var(--ok)">Prós</b>
+      ${['Resistente a impactos e água até 200 m','Visor grande, fácil de ler no escuro','Preço bem abaixo da média da categoria'].map(t=>`<div class="pcItem"><span style="color:var(--ok);font-weight:600">+</span>${t}</div>`).join('')}
+    </div>
+    <div class="pcCol"><b style="color:var(--dang)">Contras</b>
+      ${['Pulseira de resina, não é de metal','Sem GPS nem conexão por app'].map(t=>`<div class="pcItem"><span style="color:var(--dang);font-weight:600">–</span>${t}</div>`).join('')}
+    </div>
+  </div>`;
+}
+function storesBlock(){
+  return STORES_12.map(s=>`<div class="storeRow${s[5]?' best':''}">
+    <div class="ph" style="height:100px;border-radius:8px"></div>
+    <div class="between">${s[5]?mkBest(s[0]):mk(s[0])}<b style="font-size:16px;font-weight:600">R$ ${s[2]}</b></div>
+    <div class="row" style="gap:6px"><span style="color:var(--${s[4]});font-size:10px">●</span><span class="muted" style="font-size:12px">${s[3]}</span></div>
+    <span class="${s[5]?'btn':'btn ghost'} block">Acessar</span>
+  </div>`).join('');
+}
+function priceToggleBlock(bigPriceStyle){
+  return `<div class="row" style="gap:8px;margin-bottom:14px">
+      <span class="btn" onclick="pulsoSetPriceMode(this,'cash')">À vista</span>
+      <span class="btn ghost" onclick="pulsoSetPriceMode(this,'inst')">Parcelado</span>
+    </div>
+    <div class="priceDisplay" data-cash="689,00" data-inst-total="730,00" data-inst-n="12" data-inst-each="60,83" style="margin-bottom:16px">
+      <div class="bigPrice" style="${bigPriceStyle}">R$ 689,00</div>
+      <div class="priceSub sec"></div>
+    </div>`;
+}
+
+// ---------- SILVER LUXURY ----------
+function slvHeader(){
+  return `<div class="slv-header">
+    <div class="slv-mark">Pulso Promos</div>
+    <nav class="slv-nav"><span>Promoções</span><span>Marcas</span><span>Automáticos</span><span>Comunidades</span></nav>
+    <div class="row" style="gap:14px">
+      <span class="input" style="width:180px;border-radius:2px">Buscar relógio…</span>
+      <details class="avatarDD"><summary><i class="avImg" style="border-radius:50%"></i>▾</summary><div class="menu"><a>Perfil</a><a>Favoritos</a></div></details>
+    </div>
+  </div>`;
+}
+const SCREEN_09_SILVER = `<div class="frame site slv-page" style="height:1450px">
+  ${slvHeader()}
+  <div class="slv-hero">
+    <div>
+      <h1 class="slv-h1">O preço certo<br>tem <span class="serif">precisão.</span></h1>
+      <div class="slv-rule"></div>
+      <p class="slv-sub">Cada oferta é comparada com o histórico dos últimos 90 dias antes de chegar até você.</p>
+    </div>
+    <div class="slv-ring"></div>
+  </div>
+  <div class="slv-body" style="padding-top:0">
+    <div class="slv-section-head"><h2>Em destaque</h2><span>${OFF.length} peças</span></div>
+    <div class="slv-grid">
+      ${OFF.map(o=>`<div class="slv-card">
+        <div class="slv-card-art"></div>
+        <div class="slv-card-meta"><span>Menor preço via ${o[4]}</span></div>
+        <h3 class="slv-card-name">${o[0]}</h3>
+        <div class="slv-card-price"><b>${o[2]}</b> <span style="font-size:11px;font-weight:500;color:var(--muted)">à vista</span></div>
+        <div style="font-size:12px;color:var(--sec);margin-top:-8px">${o[3]} <span class="muted" style="font-size:10px">· parcelado</span></div>
+        ${o[5]?couponBlock(o[5]):''}
+        <span class="btn block">Acessar</span>
+      </div>`).join('')}
+    </div>
+  </div>
+</div>`;
+
+const SCREEN_12_SILVER = `<div class="frame site slv-page" style="height:2350px">
+  ${slvHeader()}
+  <div class="slv-pagehead">
+    <div class="crumb">Promoções › Relógios › Casio G-Shock GA-2100-1A1</div>
+    <h1>Casio G-Shock GA-2100-1A1</h1>
+  </div>
+  <div class="slv-body">
+    <div class="slv-two" style="margin-bottom:54px">
+      <div style="height:340px;background:linear-gradient(160deg,var(--elev),var(--bg) 70%);border:1px solid var(--bord)"></div>
+      <div>
+        <div class="row" style="gap:8px;margin-bottom:14px">${mkBest('Shopee')}<span class="chip ok">11,6% abaixo da média</span></div>
+        <div class="sec" style="margin-bottom:20px">45 mm · quartzo · 200 m · resina</div>
+        ${priceToggleBlock("font-family:'DM Serif Display',serif;font-size:32px;font-weight:400;color:var(--txt)")}
+        ${HAS_COUPON_12?couponBlock(COUPON_CODE_12):''}
+        <div class="row" style="gap:10px;margin-top:16px">
+          <span class="btn block" style="flex:1">Acessar</span>
+          ${authModalBlock()}
+        </div>
+        <div class="muted" style="margin-top:14px">Link de afiliado. Preço e cupom podem mudar; o valor válido é o da loja.</div>
+      </div>
+    </div>
+    <div class="slv-section-head"><h2>Histórico de preços</h2><span>90 dias</span></div>
+    <div class="histGrid" style="margin-bottom:54px">
+      ${priceCardHTML(CASH_12, INST_12, 760, 330, 90, {withTitle:false})}
+      <div class="card"><h3>Outras lojas com este relógio</h3>
+        <div class="sec">A de melhor preço é a mesma que abre no botão "Acessar", no topo.</div>
+        <div class="storesScroll">${storesBlock()}</div>
+      </div>
+    </div>
+    <div class="slv-section-head"><h2>Especificações</h2></div>
+    <div class="slv-panel" style="margin-bottom:54px">${specsBlock()}</div>
+    <div class="slv-section-head"><h2>Prós e contras</h2></div>
+    <div class="slv-panel" style="margin-bottom:54px">${prosConsBlock()}</div>
+    <div class="slv-section-head"><h2>Vídeo explicativo</h2><span>em breve</span></div>
+    <div class="slv-panel"><span class="muted">Este espaço vai trazer um vídeo já existente sobre o produto.</span></div>
+  </div>
+</div>`;
+
+const SCREEN_13_SILVER = `<div class="frame site slv-page" style="height:1050px">
+  ${slvHeader()}
+  <div class="slv-pagehead"><div class="crumb">Sua conta</div><h1>Perfil e favoritos</h1></div>
+  <div class="slv-body" style="display:flex;gap:36px;align-items:flex-start">
+    <div class="slv-profile">
+      <i class="slv-avatar"></i>
+      <div><b style="font-size:14px;font-weight:600">Ana Souza</b><div class="muted">ana.souza@gmail.com</div></div>
+      <span class="chip" style="border-radius:2px">Conta pelo Google</span>
+      <span class="btn ghost block">Sair da conta</span>
+    </div>
+    <div style="flex:1">
+      <div style="font-family:'DM Serif Display',serif;font-size:19px;margin-bottom:18px">Meus favoritos · ${FAV.length} relógios</div>
+      <div class="slv-grid" style="grid-template-columns:repeat(2,1fr)">
+        ${FAV.map(f=>`<div class="slv-card">
+          <div class="slv-card-art"></div>
+          <div class="between">${mkBest(f[2])}<span style="color:var(--dang)">♥</span></div>
+          <h3 class="slv-card-name">${f[0]}</h3>
+          <div class="slv-card-price"><b>${f[1]}</b> <span style="font-size:11px;font-weight:500;color:var(--muted)">à vista</span></div>
+          <div style="font-size:12px;color:var(--sec);margin-top:-8px">${f[3]} <span class="muted" style="font-size:10px">· parcelado</span></div>
+        </div>`).join('')}
+      </div>
+    </div>
+  </div>
+</div>`;
+
+// ---------- GOLD PREMIUM ----------
+function gldHeader(){
+  return `<div class="gld-header">
+    <div style="width:140px"></div>
+    <div>
+      <div class="gld-mark">Pulso Promos</div>
+      <div class="gld-rule"></div>
+      <nav class="gld-nav"><span>Promoções</span><span>Marcas</span><span>Comunidades</span></nav>
+    </div>
+    <div style="width:140px;display:flex;justify-content:flex-end">
+      <details class="avatarDD"><summary><i class="avImg"></i>▾</summary><div class="menu"><a>Perfil</a><a>Favoritos</a></div></details>
+    </div>
+  </div>`;
+}
+const SCREEN_09_GOLD = `<div class="frame site gld-page" style="height:1900px">
+  <div class="gld-topline">RELÓGIOS SELECIONADOS COM CRITÉRIO</div>
+  ${gldHeader()}
+  <div class="gld-hero">
+    <div class="gld-hero-copy">
+      <h1 class="gld-h1">Elegância que<br>se paga menos.</h1>
+      <p class="gld-sub">Uma curadoria de relógios clássicos, com o histórico de preço a favor de quem compra.</p>
+    </div>
+    <div class="gld-hero-art"><div class="gld-frame"><div class="gld-frame-inner"></div></div></div>
+  </div>
+  <div class="gld-body" style="padding-top:54px">
+    <div class="gld-section-head"><h2>Peças em destaque</h2><span>Selecionadas pelo histórico de 90 dias</span></div>
+    <div class="gld-grid">
+      ${OFF.map(o=>`<div class="gld-card">
+        <div class="gld-card-frame"><div class="gld-card-art"></div></div>
+        <div class="gld-card-store">Menor preço via ${o[4]}</div>
+        <h3 class="gld-card-name">${o[0]}</h3>
+        <div class="gld-card-price">${o[2]} <span style="font-size:10px;font-weight:500;color:var(--muted)">à vista</span></div>
+        <div style="font-size:11px;color:var(--sec);margin-top:2px">${o[3]} <span class="muted" style="font-size:10px">· parcelado</span></div>
+        ${o[5]?`<div style="margin:12px 0">${couponBlock(o[5])}</div>`:'<div style="height:12px"></div>'}
+        <span class="btn block">Acessar</span>
+      </div>`).join('')}
+    </div>
+  </div>
+</div>`;
+
+const SCREEN_12_GOLD = `<div class="frame site gld-page" style="height:2550px">
+  <div class="gld-topline">RELÓGIOS SELECIONADOS COM CRITÉRIO</div>
+  ${gldHeader()}
+  <div class="gld-pagehead"><div class="crumb">Promoções › Relógios › Casio G-Shock GA-2100-1A1</div><h1>Casio G-Shock GA-2100-1A1</h1></div>
+  <div class="gld-body">
+    <div class="gld-two" style="margin-bottom:54px">
+      <div class="gld-frame" style="max-width:100%"><div class="gld-frame-inner"></div></div>
+      <div>
+        <div class="row" style="gap:8px;margin-bottom:14px">${mkBest('Shopee')}<span class="chip ok">11,6% abaixo da média</span></div>
+        <div class="sec" style="margin-bottom:20px">45 mm · quartzo · 200 m · resina</div>
+        ${priceToggleBlock("font-family:'Cormorant Garamond',serif;font-style:italic;font-size:34px;font-weight:500;color:var(--txt)")}
+        ${HAS_COUPON_12?couponBlock(COUPON_CODE_12):''}
+        <div class="row" style="gap:10px;margin-top:16px">
+          <span class="btn block" style="flex:1">Acessar</span>
+          ${authModalBlock()}
+        </div>
+        <div class="muted" style="margin-top:14px">Link de afiliado. Preço e cupom podem mudar; o valor válido é o da loja.</div>
+      </div>
+    </div>
+    <div class="gld-section-head"><h2>Histórico de preços</h2><span>90 dias de acompanhamento</span></div>
+    <div class="histGrid" style="margin-bottom:54px">
+      ${priceCardHTML(CASH_12, INST_12, 760, 330, 90, {withTitle:false})}
+      <div class="card"><h3>Outras lojas com este relógio</h3>
+        <div class="sec">A de melhor preço é a mesma que abre no botão "Acessar", no topo.</div>
+        <div class="storesScroll">${storesBlock()}</div>
+      </div>
+    </div>
+    <div class="gld-section-head"><h2>Especificações</h2></div>
+    <div class="gld-panel" style="margin-bottom:54px">${specsBlock()}</div>
+    <div class="gld-section-head"><h2>Prós e contras</h2></div>
+    <div class="gld-panel" style="margin-bottom:54px">${prosConsBlock()}</div>
+    <div class="gld-section-head"><h2>Vídeo explicativo</h2><span>em breve</span></div>
+    <div class="gld-panel"><span class="muted">Este espaço vai trazer um vídeo já existente sobre o produto.</span></div>
+  </div>
+</div>`;
+
+const SCREEN_13_GOLD = `<div class="frame site gld-page" style="height:1200px">
+  <div class="gld-topline">RELÓGIOS SELECIONADOS COM CRITÉRIO</div>
+  ${gldHeader()}
+  <div class="gld-pagehead"><div class="crumb">Sua conta</div><h1>Perfil e favoritos</h1></div>
+  <div class="gld-body" style="display:flex;gap:40px;align-items:flex-start;justify-content:center">
+    <div class="gld-profile">
+      <i class="gld-avatar"></i>
+      <div><b style="font-size:14px;font-weight:600">Ana Souza</b><div class="muted">ana.souza@gmail.com</div></div>
+      <span class="chip">Conta pelo Google</span>
+      <span class="btn ghost block">Sair da conta</span>
+    </div>
+    <div>
+      <div class="gld-section-head" style="text-align:left;margin-bottom:24px"><h2>Meus favoritos</h2><span>${FAV.length} relógios</span></div>
+      <div class="gld-grid" style="justify-content:flex-start">
+        ${FAV.map(f=>`<div class="gld-card">
+          <div class="gld-card-frame"><div class="gld-card-art"></div></div>
+          <div class="between"><div class="gld-card-store">Menor preço via ${f[2]}</div><span style="color:var(--dang)">♥</span></div>
+          <h3 class="gld-card-name">${f[0]}</h3>
+          <div class="gld-card-price">${f[1]} <span style="font-size:10px;font-weight:500;color:var(--muted)">à vista</span></div>
+          <div style="font-size:11px;color:var(--sec);margin-top:2px">${f[3]} <span class="muted" style="font-size:10px">· parcelado</span></div>
+        </div>`).join('')}
+      </div>
+    </div>
+  </div>
+</div>`;
+
+// ---------- GOLD & SILVER LUXURY SALE ----------
+function sleHeader(){
+  return `<div class="sle-header">
+    <div class="sle-mark">Pulso <span>Promos</span></div>
+    <nav class="sle-nav"><span>Promoções</span><span>Marcas</span><span>Automáticos</span><span>Comunidades</span></nav>
+    <details class="avatarDD"><summary><i class="avImg"></i>▾</summary><div class="menu"><a>Perfil</a><a>Favoritos</a></div></details>
+  </div>`;
+}
+const SCREEN_09_SALE = `<div class="frame site sle-page" style="height:1650px">
+  <div class="sle-strip">Preços comparados com 90 dias de histórico, toda semana</div>
+  ${sleHeader()}
+  <div class="sle-hero">
+    <span class="sle-badge">Ofertas selecionadas toda semana</span>
+    <h1 class="sle-h1">Relógios premium,<br><em>no menor preço já visto.</em></h1>
+    <p class="sle-sub">Comparamos os últimos 90 dias de cada modelo antes de qualquer oferta ir ao ar.</p>
+  </div>
+  <div class="sle-body">
+    <div class="sle-section-head"><h2>Promoções da semana</h2><div class="sec">${OFF.length} relógios</div></div>
+    <div class="sle-grid">
+      ${OFF.map((o,i)=>`<div class="sle-card${i===0?' gold-edge':''}">
+        <div class="sle-card-art"></div>
+        <h3 class="sle-card-name">${o[0]}</h3>
+        <div class="sle-card-store">Menor preço via ${o[4]}</div>
+        <div class="sle-card-price">${o[2]} <span style="font-size:10px;font-weight:500;color:var(--muted)">à vista</span></div>
+        <div style="font-size:11px;color:var(--muted)">${o[3]} · parcelado</div>
+        ${o[5]?couponBlock(o[5]):''}
+        <span class="btn block">Acessar</span>
+      </div>`).join('')}
+    </div>
+  </div>
+</div>`;
+
+const SCREEN_12_SALE = `<div class="frame site sle-page" style="height:2300px">
+  <div class="sle-strip">Preços comparados com 90 dias de histórico, toda semana</div>
+  ${sleHeader()}
+  <div class="sle-pagehead"><div class="crumb">Promoções › Relógios › Casio G-Shock GA-2100-1A1</div><h1>Casio G-Shock GA-2100-1A1</h1></div>
+  <div class="sle-body">
+    <div class="sle-two" style="margin-bottom:40px">
+      <div style="height:320px;border-radius:16px;background:linear-gradient(160deg,var(--elev),var(--bg) 70%);border:1px solid var(--bord)"></div>
+      <div>
+        <div class="row" style="gap:8px;margin-bottom:14px">${mkBest('Shopee')}<span class="chip ok">11,6% abaixo da média</span></div>
+        <div class="sec" style="margin-bottom:20px">45 mm · quartzo · 200 m · resina</div>
+        ${priceToggleBlock("font-family:'Playfair Display',serif;font-weight:700;font-size:30px;color:var(--txt)")}
+        ${HAS_COUPON_12?couponBlock(COUPON_CODE_12):''}
+        <div class="row" style="gap:10px;margin-top:16px">
+          <span class="btn block" style="flex:1">Acessar</span>
+          ${authModalBlock()}
+        </div>
+        <div class="muted" style="margin-top:14px">Link de afiliado. Preço e cupom podem mudar; o valor válido é o da loja.</div>
+      </div>
+    </div>
+    <div class="sle-section-head"><h2>Histórico de preços</h2></div>
+    <div class="histGrid" style="margin-bottom:40px">
+      ${priceCardHTML(CASH_12, INST_12, 760, 330, 90, {withTitle:false})}
+      <div class="card"><h3>Outras lojas com este relógio</h3>
+        <div class="sec">A de melhor preço é a mesma que abre no botão "Acessar", no topo.</div>
+        <div class="storesScroll">${storesBlock()}</div>
+      </div>
+    </div>
+    <div class="sle-section-head"><h2>Especificações</h2></div>
+    <div class="sle-panel" style="margin-bottom:40px">${specsBlock()}</div>
+    <div class="sle-section-head"><h2>Prós e contras</h2></div>
+    <div class="sle-panel" style="margin-bottom:40px">${prosConsBlock()}</div>
+    <div class="sle-section-head"><h2>Vídeo explicativo</h2><span class="chip">em breve</span></div>
+    <div class="sle-panel"><span class="muted">Este espaço vai trazer um vídeo já existente sobre o produto.</span></div>
+  </div>
+</div>`;
+
+const SCREEN_13_SALE = `<div class="frame site sle-page" style="height:1000px">
+  <div class="sle-strip">Preços comparados com 90 dias de histórico, toda semana</div>
+  ${sleHeader()}
+  <div class="sle-pagehead"><div class="crumb">Sua conta</div><h1>Perfil e favoritos</h1></div>
+  <div class="sle-body" style="display:flex;gap:20px;align-items:flex-start">
+    <div class="sle-profile">
+      <i class="sle-avatar"></i>
+      <div><b style="font-size:14px;font-weight:600">Ana Souza</b><div class="muted">ana.souza@gmail.com</div></div>
+      <span class="chip">Conta pelo Google</span>
+      <span class="btn ghost block">Sair da conta</span>
+    </div>
+    <div style="flex:1">
+      <div class="sle-section-head"><h2>Meus favoritos</h2><div class="sec">${FAV.length} relógios</div></div>
+      <div class="sle-grid">
+        ${FAV.map(f=>`<div class="sle-card">
+          <div class="sle-card-art"></div>
+          <div class="between">${mkBest(f[2])}<span style="color:var(--dang)">♥</span></div>
+          <h3 class="sle-card-name">${f[0]}</h3>
+          <div class="sle-card-price">${f[1]} <span style="font-size:10px;font-weight:500;color:var(--muted)">à vista</span></div>
+          <div style="font-size:11px;color:var(--muted)">${f[3]} · parcelado</div>
+        </div>`).join('')}
+      </div>
+    </div>
+  </div>
+</div>`;
+
+const SITE_SCREENS_BY_PAL = {
+  '09 Site público (fase 2)': { silver: SCREEN_09_SILVER, gold: SCREEN_09_GOLD, sale: SCREEN_09_SALE },
+  '12 Produto — detalhe (site público)': { silver: SCREEN_12_SILVER, gold: SCREEN_12_GOLD, sale: SCREEN_12_SALE },
+  '13 Perfil e favoritos (site público)': { silver: SCREEN_13_SILVER, gold: SCREEN_13_GOLD, sale: SCREEN_13_SALE }
+};
+
+SCREENS['10 Telegram — bot de revisão'] = `<div class="frame mobile tg" style="height:844px">
+  <div class="tgHead"><i class="av"></i><div><b style="font-size:14px;font-weight:600">Pulso Bot</b><div class="muted" style="font-size:11px">revisão de ofertas · online</div></div></div>
+  <div class="tgBody">
+    <div style="text-align:center"><span class="chip">Hoje · 3 candidatos na fila</span></div>
+    <div class="bubble">
+      <div class="between"><span style="color:var(--acc);font-size:12px;font-weight:500">Candidato · pontuação 92</span>${mk('Shopee')}</div>
+      <div class="ph" style="height:140px"></div>
+      <b style="font-size:15px;font-weight:600">Casio G-Shock GA-2100-1A1</b>
+      <div class="big">R$ 689,00 à vista · 12x de R$ 63,80</div>
+      <div class="sec">Média 30 d: R$ 779,90 · queda de 11,6%</div>
+      <div class="sec">Menor preço em 90 dias: R$ 655,00</div>
+      <div style="color:var(--warn);font-size:12px">Cupom CASIO10 · testado hoje às 08:40</div>
+      <div class="sec">Vendedor: Casio Oficial · em estoque</div>
+    </div>
+    <div class="kb"><div class="rowb"><span class="btn block">Aprovar e publicar</span></div>
+      <div class="rowb">${['Editar texto','Ver histórico','Descartar'].map(t=>`<span class="btn ghost">${t}</span>`).join('')}</div></div>
+    <div class="banner" style="background:var(--okSoft);color:var(--ok)">Publicado no canal às 09:14. Post registrado com o seu nome na auditoria.</div>
+    <div class="banner" style="background:var(--warnSoft);color:var(--warn)">Aviso: o token do Mercado Livre expira em 3 dias.</div>
+  </div></div>`;
+
+SCREENS['11 Telegram — post no canal'] = `<div class="frame mobile tg" style="height:844px">
+  <div class="tgHead"><i class="av"></i><div><b style="font-size:14px;font-weight:600">Pulso Promos | Relógios</b><div class="muted" style="font-size:11px">canal · 4.812 inscritos</div></div></div>
+  <div class="tgBody">
+    <div class="bubble" style="border:none">
+      <div class="ph" style="height:170px"></div>
+      <div class="row">${mk('Shopee')}<span class="chip ok">11,6% abaixo da média</span></div>
+      <b style="font-size:15px;font-weight:600">Casio G-Shock GA-2100-1A1 — 45 mm, 200 m</b>
+      <div class="big" style="font-size:20px">R$ 689,00 à vista</div>
+      <div class="sec">ou 12x de R$ 63,80</div>
+      <div class="between" style="padding:10px 12px;border-radius:10px;background:var(--input);border:1px solid var(--bStrong)"><span style="color:var(--warn);font-size:13px;font-weight:500">Cupom CASIO10</span><span class="muted" style="font-size:11px">toque para copiar</span></div>
+      <div style="padding:10px 12px;border-radius:10px;background:var(--input)"><div class="sec" style="font-size:11px">Média de 30 dias: R$ 779,90</div><div class="sec" style="font-size:11px">Menor preço em 90 dias: R$ 655,00</div></div>
+      <div class="btn block">Acessar</div>
+      <div class="muted" style="font-size:10px">Link de afiliado · preço e cupom consultados em 21/09/2026 às 09:12 e sujeitos a mudança.</div>
+      <div class="between muted" style="font-size:11px"><span>Pulso Promos</span><span>2,1 mil visualizações · 09:14</span></div>
+    </div>
+    <div class="row">${['Curtiu 48','Bom preço 31','Comprei 12'].map(r=>`<span class="chip" style="border-radius:14px;padding:6px 10px">${r}</span>`).join('')}</div>
+  </div></div>`;
+
+const NAMES = Object.keys(SCREENS);
+const slug = n => 'scr-' + n.replace(/[^a-zA-Z0-9]+/g,'-');
+const state = { mode:'pal', pal:'silver', scr:NAMES[8] };
+
+const palSeg = document.getElementById('palSeg');
+Object.entries(PALS).forEach(([k,p])=>{
+  const b=document.createElement('button');
+  b.className='tab'; b.textContent=p.nome; b.dataset.pal=k;
+  b.setAttribute('aria-pressed', k===state.pal ? 'true':'false');
+  b.addEventListener('click',()=>{ state.pal=k; sync(); });
+  palSeg.appendChild(b);
+});
+const sel = document.getElementById('scr');
+NAMES.forEach(n=>{ const o=document.createElement('option'); o.value=n; o.textContent=n; sel.appendChild(o); });
+sel.value = state.scr;
+sel.addEventListener('change',()=>{
+  state.scr=sel.value;
+  if(state.mode==='pal'){ const el=document.getElementById(slug(sel.value)); if(el) el.scrollIntoView({behavior:'smooth', block:'start'}); }
+  else { render(); }
+});
+document.querySelectorAll('#modeSeg .tab').forEach(b=>{
+  b.addEventListener('click',()=>{ state.mode=b.dataset.mode; sync(); });
+});
+
+function vars(k){ return Object.entries(PALS[k].v).map(([n,v])=>`--${n}:${v}`).join(';'); }
+
+function board(palKey, screenName, colWidth){
+  const wrap = document.createElement('div');
+  const holder = document.createElement('div');
+  holder.className = 'holder';
+  const scaler = document.createElement('div');
+  scaler.className = 'scaler theme';
+  scaler.style.cssText = vars(palKey);
+  const siteVariant = SITE_SCREENS_BY_PAL[screenName];
+  scaler.innerHTML = (siteVariant && siteVariant[palKey]) ? siteVariant[palKey] : SCREENS[screenName];
+  holder.appendChild(scaler);
+  wrap.appendChild(holder);
+  requestAnimationFrame(()=>{
+    const frame = scaler.querySelector('.frame');
+    const natural = frame.offsetWidth || 1440;
+    const s = colWidth / natural;
+    scaler.style.transform = `scale(${s})`;
+    holder.style.height = (frame.offsetHeight * s) + 'px';
+  });
+  return wrap;
+}
+
+function render(){
+  const stage = document.getElementById('stage');
+  const note = document.getElementById('note');
+  stage.innerHTML='';
+  const w = stage.clientWidth || 1200;
+  if(state.mode==='pal'){
+    note.textContent = PALS[state.pal].nome + ' — ' + PALS[state.pal].ideia + '. As ' + NAMES.length + ' telas abaixo usam essa paleta.';
+    NAMES.forEach(n=>{
+      const block=document.createElement('div'); block.className='block'; block.id=slug(n);
+      const h=document.createElement('h2'); h.textContent=n; block.appendChild(h);
+      const colW = n.indexOf('Telegram')>-1 ? Math.min(420, w) : w;
+      block.appendChild(board(state.pal, n, colW));
+      stage.appendChild(block);
+    });
+  } else {
+    note.textContent = state.scr + ' — a mesma tela nas 4 paletas, para comparar lado a lado.';
+    const grid=document.createElement('div'); grid.className='cmp';
+    const colW = (w - 16) / 2;
+    Object.keys(PALS).forEach(k=>{
+      const cell=document.createElement('div');
+      const t=document.createElement('p'); t.className='tagline'; t.textContent=PALS[k].nome+' · '+PALS[k].ideia;
+      cell.appendChild(t);
+      cell.appendChild(board(k, state.scr, colW));
+      grid.appendChild(cell);
+    });
+    stage.appendChild(grid);
+  }
+}
+
+function sync(){
+  document.querySelectorAll('#palSeg .tab').forEach(b=>b.setAttribute('aria-pressed', b.dataset.pal===state.pal?'true':'false'));
+  document.querySelectorAll('#modeSeg .tab').forEach(b=>b.setAttribute('aria-pressed', b.dataset.mode===state.mode?'true':'false'));
+  render();
+}
+let t; window.addEventListener('resize',()=>{ clearTimeout(t); t=setTimeout(render,180); });
+sync();
+</script>
+</body>
+</html>
