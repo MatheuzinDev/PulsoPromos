@@ -79,6 +79,13 @@ class ListingCreate(BaseModel):
     url: Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=2000)]
 
 
+class ListingRow(ListingCreate):
+    """Linha do CSV de anuncios: o vinculo com o relogio viaja pelo EAN."""
+
+    ean: Ean
+    ativo: bool = True
+
+
 class ListingOut(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
