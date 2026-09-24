@@ -96,3 +96,21 @@ def listar_anuncios(watch_id: int, session: SessionDep) -> list[ListingOut]:
 @router.post("/{watch_id}/listings/{listing_id}/desativar", response_model=ListingOut)
 def desativar_anuncio(watch_id: int, listing_id: int, session: SessionDep) -> ListingOut:
     return ListingOut.model_validate(service.deactivate_listing(session, watch_id, listing_id))
+
+
+listings_router = APIRouter(prefix="/listings", tags=["catalogo"])
+
+
+@listings_router.get("/export")
+def exportar_anuncios_csv(session: SessionDep) -> Response:
+    return Response(
+        content=csv_io.export_listings_csv(session),
+        media_type="text/csv; charset=utf-8",
+        headers={"Content-Disposition": 'attachment; filename="anuncios.csv"'},
+    )
+
+
+@listings_router.post("/import", response_model=ImportResult)
+async def importar_anuncios_csv(request: Request, session: SessionDep) -> ImportResult:
+    """Corpo cru em text/csv (UTF-8). Atomico; o EAN da linha precisa existir no catalogo."""
+    return csv_io.import_listings_csv(session, await request.body())
