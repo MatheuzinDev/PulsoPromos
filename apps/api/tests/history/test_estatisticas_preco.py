@@ -162,12 +162,11 @@ def test_dois_anuncios_usam_o_mais_barato_de_cada_momento(db_session: Session) -
     assert r.menor_90d.ocorrido_em == AGORA - timedelta(days=2)
 
 
-def test_sem_estoque_e_anuncio_inativo_ficam_fora_das_duas_janelas(db_session: Session) -> None:
+def test_anuncio_inativo_fica_fora_das_duas_janelas(db_session: Session) -> None:
     watch = _watch(db_session)
     a = _listing(db_session, watch, "a")
     inativo = _listing(db_session, watch, "inativo", ativo=False)
     _leitura(db_session, a, 50, "100.00")
-    _leitura(db_session, a, 10, "10.00", em_estoque=False)  # seria o menor
     _leitura(db_session, inativo, 60, "5.00")  # seria o menor e semearia a serie
     _leitura(db_session, inativo, 8, "6.00")
 
@@ -175,6 +174,70 @@ def test_sem_estoque_e_anuncio_inativo_ficam_fora_das_duas_janelas(db_session: S
 
     assert r.menor_90d.preco == Decimal("100.00")
     assert r.media_30d.media == Decimal("100.00")
+
+
+def test_esgotado_sai_da_serie_e_o_outro_anuncio_assume(db_session: Session) -> None:
+    watch = _watch(db_session)
+    barato = _listing(db_session, watch, "barato")
+    caro = _listing(db_session, watch, "caro")
+    _leitura(db_session, barato, 40, "100.00")
+    _leitura(db_session, barato, 20, "100.00", em_estoque=False)
+    _leitura(db_session, caro, 40, "300.00")
+
+    r = calcular_estatisticas(db_session, watch.id, agora=AGORA)
+
+    # -30..-20: menor 100 (10d); -20..agora: so o caro, 300 (20d): 7000/30
+    assert r.media_30d.media == Decimal("233.33")
+    assert r.media_30d.cobertura.fracao_coberta == Decimal("1.0000")
+    assert r.menor_90d.preco == Decimal("100.00")
+
+
+def test_unico_anuncio_esgotado_nao_vira_zero_no_divisor(db_session: Session) -> None:
+    watch = _watch(db_session)
+    a = _listing(db_session, watch, "a")
+    _leitura(db_session, a, 40, "100.00")
+    _leitura(db_session, a, 20, "100.00", em_estoque=False)
+
+    r = calcular_estatisticas(db_session, watch.id, agora=AGORA)
+
+    # 10 dias com preco (de -30 a -20); os 20 sem estoque nao entram no divisor
+    assert r.media_30d.media == Decimal("100.00")
+    c = r.media_30d.cobertura
+    assert c.dias_com_preco == Decimal("10.00")
+    assert c.fracao_coberta == Decimal("0.3333")
+    assert c.semeada is True
+    assert c.amostras == 1  # a leitura sem estoque e observada
+    assert r.menor_90d.cobertura.dias_com_preco == Decimal("20.00")  # -40..-20
+
+
+def test_anuncio_esgotado_volta_a_entrar_na_serie(db_session: Session) -> None:
+    watch = _watch(db_session)
+    a = _listing(db_session, watch, "a")
+    _leitura(db_session, a, 40, "100.00")
+    _leitura(db_session, a, 20, "100.00", em_estoque=False)
+    _leitura(db_session, a, 10, "150.00")
+
+    r = calcular_estatisticas(db_session, watch.id, agora=AGORA)
+
+    # 100 por 10d (-30..-20), ausente 10d, 150 por 10d (-10..agora): 2500/20
+    assert r.media_30d.media == Decimal("125.00")
+    assert r.media_30d.cobertura.dias_com_preco == Decimal("20.00")
+    assert r.menor_90d.preco == Decimal("100.00")
+
+
+def test_esgotado_desde_antes_da_janela_devolve_ausencia(db_session: Session) -> None:
+    watch = _watch(db_session)
+    a = _listing(db_session, watch, "a")
+    _leitura(db_session, a, 120, "100.00")
+    _leitura(db_session, a, 100, "100.00", em_estoque=False)
+
+    r = calcular_estatisticas(db_session, watch.id, agora=AGORA)
+
+    assert r.media_30d.media is None
+    assert r.menor_90d.preco is None
+    assert r.menor_90d.ocorrido_em is None
+    assert r.media_30d.cobertura.dias_com_preco == Decimal("0.00")
+    assert r.media_30d.cobertura.semeada is False
 
 
 def test_leitura_desatualizada_e_ignorada(db_session: Session) -> None:
