@@ -21,7 +21,11 @@
 
 Toda tarefa deve citar os requisitos que implementa pelo ID (`RF12`, `RNF05`). O worker recebe o trecho relevante da especificação, nunca o documento inteiro. Se um requisito estiver ambíguo ou faltando, pergunte antes de delegar — não deixe o worker inventar a regra.
 
-**Estado atual:** documentação pronta, nenhum código escrito. O próximo passo é o schema do banco e o catálogo (RF01–RF03).
+**Estado atual (26/09/2026):** **RF01, RF02 e RF03 completos e integrados ao `master`** — schema e migrations (`apps/api/alembic`), Docker Compose com PostgreSQL, `GET /health`, CRUD de relógio, vínculo e desativação de anúncios, CSV atômico de relógios e de anúncios, e guarda que impede `PATCH` do EAN ou `DELETE` em relógio com histórico. 66 testes passando em `apps/api`, com `ruff` e `mypy src` limpos.
+
+Decisões de modelagem já tomadas, que nenhum worker deve reabrir: EAN obrigatório e único (chave natural e chave de upsert do CSV); dinheiro em `NUMERIC(12,2)`; `timestamptz` em UTC; reputação de vendedor guardada **crua** em JSONB, sem normalizar para nota ou tier — quem julga o vendedor é o adaptador de cada marketplace (RF06, RNF10); import de CSV atômico, sem importação parcial.
+
+**Próximo passo:** adaptador da Shopee (RF04–RF07), hoje **bloqueado** — os detalhes da API vêm de fontes de terceiros e os termos sobre guardar histórico de preços não foram lidos (ver Riscos em `docs/requisitos.md`). Sem esse contrato confirmado, não escreva spec de adaptador: o worker inventaria o formato de resposta. Requisito herdado da correção de corrida: o coletor precisa tratar `IntegrityError` de FK se um anúncio for excluído durante a coleta.
 
 ## 1. Papel
 
@@ -179,7 +183,15 @@ orca orchestration dispatch-show --task <taskId> --preamble --json
 orca orchestration task-update --id <taskId> --status blocked --result '{"reason":"aguardando credencial"}' --json
 ```
 
-Não deixe terminal concluído aberto só para reler saída — use `worker-release` e depois `worker-read`. Se o release retornar `release_pending` ou `release_unknown`, siga a ação de recuperação do recibo; não troque por um `terminal close` genérico. No retry, o posicionamento **não** é herdado: repita `--worktree` e `--agent`.
+**Libere todo worker que terminou.** Cada terminal vivo consome memória e capacidade da máquina, e vários workers esquecidos abertos degradam o desempenho de todo o resto. Assim que você aceitar o `worker_done` e registrar as evidências, rode `worker-release` — a saída continua legível depois, com `worker-read`.
+
+Só use `worker-retain` quando precisar inspecionar o estado vivo do terminal para investigar uma falha, e libere assim que terminar a inspeção. Reter por comodidade é desperdício.
+
+Antes de despachar uma nova leva de workers, confira se não há dispatch antigo ainda ocupando terminal.
+
+**Leia o `state` do recibo, não só o `ok`.** `worker-release` devolvendo `retained` **não fechou nada** — o Orca trata como pré-existente todo terminal que ele mesmo não criou, incluindo os criados por `orca terminal create`, e o processo continua vivo consumindo memória. Nesse caso, feche com `orca terminal close --terminal <handle>`, depois de a task estar `completed` e a entrega confirmada; a saída segue legível por `worker-read`. Ao fim de cada leva, rode `orca terminal list` e confirme que sobrou apenas o seu terminal de coordenador.
+
+Isso não vale para `release_pending` nem `release_unknown`: nesses dois, siga a ação de recuperação do recibo e não troque por um `terminal close` genérico. No retry, o posicionamento **não** é herdado: repita `--worktree` e `--agent`.
 
 `orchestration reset` é global do runtime. Só use ao abandonar o estado de propósito, e nunca com outro coordenador ativo.
 
@@ -223,6 +235,8 @@ Convenção: branch `worker/<task>/<role>`, diretório `.worktrees/<task>-<role>
 
 Ao concluir, o worker reporta: branch, commits, arquivos alterados, testes executados e resultado, riscos pendentes. Remova a worktree só depois de integrar e conferir que nada ficou sem commit.
 
+**Dispatch abandonado deixa worktree órfã.** Depois de um retry ou de uma falha de ambiente, confira se sobrou worktree vazia da tentativa anterior (`orca worktree ps --json`) e remova-a — ela ocupa disco e polui a lista sem conter trabalho nenhum.
+
 ## 8. Validação
 
 "Concluído" não é evidência. Exija: testes passando, build, type-check, lint, diff revisado ou comportamento reproduzido.
@@ -255,6 +269,7 @@ Ações irreversíveis ou de alto impacto exigem validação adicional e, quando
 - [ ] alterações revisadas conforme o risco
 - [ ] integração entre workers verificada
 - [ ] riscos restantes comunicados
+- [ ] todos os workers liberados (`worker-release`) e worktrees já integradas removidas
 
 ## 12. Prioridades
 
