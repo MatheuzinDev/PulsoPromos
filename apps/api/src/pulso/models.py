@@ -24,6 +24,7 @@ from pulso.db import Base
 
 MARKETPLACES = ("shopee", "aliexpress", "mercado_livre", "amazon")
 TIPOS_MOVIMENTO = ("automatico", "quartzo", "manual", "solar", "hibrido")
+TIPOS_CUPOM = ("percentual", "valor_fixo")
 
 
 class TimestampMixin:
@@ -103,17 +104,39 @@ class PriceReading(TimestampMixin, Base):
 
 
 class Coupon(TimestampMixin, Base):
-    """Cupom de desconto (RF13)."""
+    """Cupom de desconto (RF13), estruturado para ser calculado (RF14).
+
+    `valor` e o percentual (10.00 = 10%) ou o valor em reais, conforme `tipo`. `loja` NULL
+    significa "vale para o marketplace inteiro". `regra_texto` e so observacao humana.
+    """
 
     __tablename__ = "coupon"
     __table_args__ = (
         CheckConstraint(f"marketplace IN {MARKETPLACES!r}", name="ck_coupon_marketplace"),
+        CheckConstraint(f"tipo IN {TIPOS_CUPOM!r}", name="ck_coupon_tipo"),
+        CheckConstraint(
+            "(tipo = 'percentual' AND valor > 0 AND valor <= 100)"
+            " OR (tipo = 'valor_fixo' AND valor > 0)",
+            name="ck_coupon_valor",
+        ),
+        CheckConstraint(
+            "teto_desconto IS NULL OR (tipo = 'percentual' AND teto_desconto > 0)",
+            name="ck_coupon_teto_so_percentual",
+        ),
+        CheckConstraint(
+            "minimo_compra IS NULL OR minimo_compra > 0", name="ck_coupon_minimo_compra"
+        ),
     )
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     codigo: Mapped[str] = mapped_column(String(60), nullable=False)
     marketplace: Mapped[str] = mapped_column(String(20), nullable=False)
     regra_texto: Mapped[str] = mapped_column(Text, nullable=False)
+    tipo: Mapped[str] = mapped_column(String(20), nullable=False)
+    valor: Mapped[Decimal] = mapped_column(Numeric(12, 2), nullable=False)
+    minimo_compra: Mapped[Decimal | None] = mapped_column(Numeric(12, 2), nullable=True)
+    teto_desconto: Mapped[Decimal | None] = mapped_column(Numeric(12, 2), nullable=True)
+    loja: Mapped[str | None] = mapped_column(String(60), nullable=True)
     valido_ate: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     testado_em: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     ativo: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
