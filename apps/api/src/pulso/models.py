@@ -25,6 +25,8 @@ from pulso.db import Base
 MARKETPLACES = ("shopee", "aliexpress", "mercado_livre", "amazon")
 TIPOS_MOVIMENTO = ("automatico", "quartzo", "manual", "solar", "hibrido")
 TIPOS_CUPOM = ("percentual", "valor_fixo")
+REGRAS_CANDIDATO = ("media_30d", "minimo_90d", "preco_alvo")
+STATUS_CANDIDATO = ("pendente", "aprovado", "descartado")
 
 
 class TimestampMixin:
@@ -41,9 +43,7 @@ class Watch(TimestampMixin, Base):
 
     __tablename__ = "watch"
     __table_args__ = (
-        CheckConstraint(
-            f"tipo_movimento IN {TIPOS_MOVIMENTO!r}", name="ck_watch_tipo_movimento"
-        ),
+        CheckConstraint(f"tipo_movimento IN {TIPOS_MOVIMENTO!r}", name="ck_watch_tipo_movimento"),
     )
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
@@ -158,3 +158,42 @@ class Publication(TimestampMixin, Base):
     link_publicado: Mapped[str] = mapped_column(Text, nullable=False)
     telegram_message_id: Mapped[int | None] = mapped_column(BigInteger, nullable=True)
     encerrada_em: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+
+
+class Candidate(Base):
+    """Oferta que o motor de regras (RF15) considera digna de revisao (RF19, RF20).
+
+    Existe antes de qualquer `publication`: o RF16 precisa lembrar do que ja foi alertado,
+    inclusive o que o operador descartou. Nasce `pendente`; a decisao e de RF20.
+    `preco_sem_frete` e o valor comparado pelas regras; frete so e carregado para RF19/RF22.
+    """
+
+    __tablename__ = "candidate"
+    __table_args__ = (
+        CheckConstraint(f"regra IN {REGRAS_CANDIDATO!r}", name="ck_candidate_regra"),
+        CheckConstraint(f"status IN {STATUS_CANDIDATO!r}", name="ck_candidate_status"),
+        Index("ix_candidate_watch_criado_desc", "watch_id", text("criado_em DESC")),
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    watch_id: Mapped[int] = mapped_column(ForeignKey("watch.id"), nullable=False)
+    listing_id: Mapped[int] = mapped_column(ForeignKey("listing.id"), nullable=False)
+    coupon_id: Mapped[int | None] = mapped_column(ForeignKey("coupon.id"), nullable=True)
+    regra: Mapped[str] = mapped_column(String(20), nullable=False)
+    preco_vista: Mapped[Decimal] = mapped_column(Numeric(12, 2), nullable=False)
+    desconto: Mapped[Decimal] = mapped_column(Numeric(12, 2), nullable=False)
+    preco_sem_frete: Mapped[Decimal] = mapped_column(Numeric(12, 2), nullable=False)
+    frete: Mapped[Decimal | None] = mapped_column(Numeric(12, 2), nullable=True)
+    frete_desconhecido: Mapped[bool] = mapped_column(Boolean, nullable=False)
+    media_30d: Mapped[Decimal | None] = mapped_column(Numeric(12, 2), nullable=True)
+    minimo_90d: Mapped[Decimal | None] = mapped_column(Numeric(12, 2), nullable=True)
+    preco_alvo: Mapped[Decimal | None] = mapped_column(Numeric(12, 2), nullable=True)
+    queda_percentual: Mapped[Decimal] = mapped_column(Numeric(7, 2), nullable=False)
+    economia_absoluta: Mapped[Decimal] = mapped_column(Numeric(12, 2), nullable=False)
+    pontuacao: Mapped[Decimal] = mapped_column(Numeric(12, 4), nullable=False)
+    status: Mapped[str] = mapped_column(String(20), nullable=False, default="pendente")
+    criado_em: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), nullable=False
+    )
+    decidido_em: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    decidido_por: Mapped[str | None] = mapped_column(String(120), nullable=True)
