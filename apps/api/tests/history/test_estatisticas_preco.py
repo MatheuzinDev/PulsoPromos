@@ -26,12 +26,13 @@ def _watch(session: Session) -> Watch:
     return watch
 
 
-def _listing(session: Session, watch: Watch, item: str) -> Listing:
+def _listing(session: Session, watch: Watch, item: str, *, ativo: bool = True) -> Listing:
     listing = Listing(
         watch_id=watch.id,
         marketplace="shopee",
         marketplace_item_id=f"{watch.id}-{item}",
         url=f"https://exemplo.test/{watch.id}/{item}",
+        ativo=ativo,
     )
     session.add(listing)
     session.flush()
@@ -45,13 +46,14 @@ def _leitura(
     preco: str,
     *,
     desatualizado: bool = False,
+    em_estoque: bool = True,
 ) -> None:
     session.add(
         PriceReading(
             listing_id=listing.id,
             coletado_em=AGORA - timedelta(days=dias_atras),
             preco_vista=Decimal(preco),
-            em_estoque=True,
+            em_estoque=em_estoque,
             vendedor_raw={},
             origem="teste",
             desatualizado=desatualizado,
@@ -60,23 +62,59 @@ def _leitura(
     session.flush()
 
 
-def test_media_30d_e_minimo_90d_calculados_a_mao(db_session: Session) -> None:
+def test_media_30d_pondera_patamares_pela_duracao(db_session: Session) -> None:
     watch = _watch(db_session)
     a = _listing(db_session, watch, "a")
-    _leitura(db_session, a, 91, "50.00")  # fora dos 90 dias: senao o minimo seria 50
-    _leitura(db_session, a, 60, "120.00")
-    _leitura(db_session, a, 31, "100.00")  # fora dos 30 dias: senao a media seria 85
+    _leitura(db_session, a, 40, "100.00")  # semeia a janela de 30d
     _leitura(db_session, a, 20, "90.00")
     _leitura(db_session, a, 10, "80.00")
     _leitura(db_session, a, 1, "70.00")
 
     r = calcular_estatisticas(db_session, watch.id, agora=AGORA)
 
-    assert r.media_30d.media == Decimal("80.00")  # (90+80+70)/3
-    assert r.media_30d.cobertura.amostras == 3
+    # 100 por 10d, 90 por 10d, 80 por 9d, 70 por 1d: (1000+900+720+70)/30
+    assert r.media_30d.media == Decimal("89.67")
     assert r.menor_90d.preco == Decimal("70.00")
     assert r.menor_90d.ocorrido_em == AGORA - timedelta(days=1)
-    assert r.menor_90d.cobertura.amostras == 5  # 120, 100, 90, 80, 70
+
+
+def test_preco_longo_pesa_mais_que_preco_curto(db_session: Session) -> None:
+    watch = _watch(db_session)
+    a = _listing(db_session, watch, "a")
+    _leitura(db_session, a, 30, "100.00")  # dura 25 dias
+    _leitura(db_session, a, 5, "200.00")  # dura 5 dias
+
+    r = calcular_estatisticas(db_session, watch.id, agora=AGORA)
+
+    # ponderada: (100*25 + 200*5)/30 = 116.67; aritmetica simples daria 150.00
+    assert r.media_30d.media == Decimal("116.67")
+
+
+def test_cenario_a_preco_estavel_sem_leitura_nova_mantem_media(db_session: Session) -> None:
+    watch = _watch(db_session)
+    a = _listing(db_session, watch, "a")
+    _leitura(db_session, a, 45, "200.00")
+
+    r = calcular_estatisticas(db_session, watch.id, agora=AGORA)
+
+    assert r.media_30d.media == Decimal("200.00")
+    assert r.menor_90d.preco == Decimal("200.00")
+
+
+def test_cenario_b_anuncio_barato_estavel_nao_some_da_serie(db_session: Session) -> None:
+    watch = _watch(db_session)
+    barato = _listing(db_session, watch, "barato")
+    caro = _listing(db_session, watch, "caro")
+    _leitura(db_session, barato, 40, "100.00")  # estavel, sem leitura nova
+    _leitura(db_session, caro, 35, "300.00")
+    _leitura(db_session, caro, 21, "310.00")
+    _leitura(db_session, caro, 14, "290.00")
+    _leitura(db_session, caro, 7, "300.00")
+
+    r = calcular_estatisticas(db_session, watch.id, agora=AGORA)
+
+    assert r.media_30d.media == Decimal("100.00")  # sem o barato seria ~300
+    assert r.menor_90d.preco == Decimal("100.00")
 
 
 def test_menor_de_90d_pode_ser_anterior_a_janela_de_30d(db_session: Session) -> None:
@@ -89,7 +127,20 @@ def test_menor_de_90d_pode_ser_anterior_a_janela_de_30d(db_session: Session) -> 
 
     assert r.menor_90d.preco == Decimal("40.00")
     assert r.menor_90d.ocorrido_em == AGORA - timedelta(days=80)
-    assert r.media_30d.media == Decimal("100.00")
+    assert r.media_30d.media == Decimal("50.00")  # 40 por 25d, 100 por 5d
+
+
+def test_empate_no_minimo_devolve_o_instante_mais_antigo(db_session: Session) -> None:
+    watch = _watch(db_session)
+    a = _listing(db_session, watch, "a")
+    _leitura(db_session, a, 50, "60.00")
+    _leitura(db_session, a, 40, "90.00")
+    _leitura(db_session, a, 10, "60.00")
+
+    r = calcular_estatisticas(db_session, watch.id, agora=AGORA)
+
+    assert r.menor_90d.preco == Decimal("60.00")
+    assert r.menor_90d.ocorrido_em == AGORA - timedelta(days=50)
 
 
 def test_dois_anuncios_usam_o_mais_barato_de_cada_momento(db_session: Session) -> None:
@@ -104,11 +155,26 @@ def test_dois_anuncios_usam_o_mais_barato_de_cada_momento(db_session: Session) -
 
     r = calcular_estatisticas(db_session, watch.id, agora=AGORA)
 
-    # serie 100, 80, 80, 60 -> 320/4. So A daria 86.67; media dos anuncios daria outra.
-    assert r.media_30d.media == Decimal("80.00")
+    # 100 por 5d, 80 por 2d, 80 por 1d, 60 por 2d: 860/10
+    assert r.media_30d.media == Decimal("86.00")
     assert r.media_30d.cobertura.amostras == 4
     assert r.menor_90d.preco == Decimal("60.00")
     assert r.menor_90d.ocorrido_em == AGORA - timedelta(days=2)
+
+
+def test_sem_estoque_e_anuncio_inativo_ficam_fora_das_duas_janelas(db_session: Session) -> None:
+    watch = _watch(db_session)
+    a = _listing(db_session, watch, "a")
+    inativo = _listing(db_session, watch, "inativo", ativo=False)
+    _leitura(db_session, a, 50, "100.00")
+    _leitura(db_session, a, 10, "10.00", em_estoque=False)  # seria o menor
+    _leitura(db_session, inativo, 60, "5.00")  # seria o menor e semearia a serie
+    _leitura(db_session, inativo, 8, "6.00")
+
+    r = calcular_estatisticas(db_session, watch.id, agora=AGORA)
+
+    assert r.menor_90d.preco == Decimal("100.00")
+    assert r.media_30d.media == Decimal("100.00")
 
 
 def test_leitura_desatualizada_e_ignorada(db_session: Session) -> None:
@@ -122,13 +188,14 @@ def test_leitura_desatualizada_e_ignorada(db_session: Session) -> None:
     _leitura(db_session, a, 4, "1.00", desatualizado=True)  # mudaria media e minimo
     depois = calcular_estatisticas(db_session, watch.id, agora=AGORA)
 
-    assert antes.media_30d.media == Decimal("90.00")
+    # 100 por 5d, 90 por 4d, 80 por 1d: 940/10
+    assert antes.media_30d.media == Decimal("94.00")
     assert antes.menor_90d.preco == Decimal("80.00")
     assert depois == antes
     assert depois.media_30d.cobertura.amostras == 3
 
 
-def test_leituras_fora_das_janelas_ficam_de_fora(db_session: Session) -> None:
+def test_leituras_fora_das_janelas(db_session: Session) -> None:
     watch = _watch(db_session)
     a = _listing(db_session, watch, "a")
     _leitura(db_session, a, 91, "10.00")
@@ -138,20 +205,23 @@ def test_leituras_fora_das_janelas_ficam_de_fora(db_session: Session) -> None:
 
     r = calcular_estatisticas(db_session, watch.id, agora=AGORA)
 
-    assert r.media_30d.media == Decimal("100.00")
+    # 30d: semeada com 20 (31d atras) por 28d, 100 por 2d: 760/30
+    assert r.media_30d.media == Decimal("25.33")
     assert r.media_30d.cobertura.amostras == 1
-    assert r.menor_90d.preco == Decimal("20.00")
-    assert r.menor_90d.cobertura.amostras == 2
+    # 90d: a leitura de 91d atras e o preco vigente no inicio da janela
+    assert r.menor_90d.preco == Decimal("10.00")
+    assert r.menor_90d.ocorrido_em == AGORA - timedelta(days=90)
+    assert r.menor_90d.cobertura.amostras == 2  # so 31d e 2d foram observadas
 
 
 def test_sem_leitura_valida_devolve_ausencia_explicita(db_session: Session) -> None:
     vazio = _watch(db_session)
-    so_velho = _watch(db_session)
-    a = _listing(db_session, so_velho, "a")
-    _leitura(db_session, a, 200, "50.00")
+    so_invalido = _watch(db_session)
+    a = _listing(db_session, so_invalido, "a")
     _leitura(db_session, a, 3, "50.00", desatualizado=True)
+    _leitura(db_session, a, 200, "50.00", em_estoque=False)
 
-    for watch in (vazio, so_velho):
+    for watch in (vazio, so_invalido):
         r = calcular_estatisticas(db_session, watch.id, agora=AGORA)
         assert r.media_30d.media is None
         assert r.menor_90d.preco is None
@@ -159,20 +229,36 @@ def test_sem_leitura_valida_devolve_ausencia_explicita(db_session: Session) -> N
         assert r.media_30d.cobertura.amostras == 0
         assert r.media_30d.cobertura.dias_com_leitura == 0
         assert r.media_30d.cobertura.primeira_leitura is None
+        assert r.media_30d.cobertura.semeada is False
         assert r.menor_90d.cobertura.amostras == 0
+
+
+def test_cobertura_distingue_observada_de_semeada(db_session: Session) -> None:
+    watch = _watch(db_session)
+    a = _listing(db_session, watch, "a")
+    _leitura(db_session, a, 45, "200.00")  # so valor arrastado nos 30d
+
+    c = calcular_estatisticas(db_session, watch.id, agora=AGORA).media_30d.cobertura
+    assert (c.amostras, c.semeada, c.primeira_leitura) == (0, True, None)
+
+    _leitura(db_session, a, 5, "210.00")
+    c = calcular_estatisticas(db_session, watch.id, agora=AGORA).media_30d.cobertura
+    assert (c.amostras, c.semeada) == (1, True)
+    assert c.ultima_leitura == AGORA - timedelta(days=5)
 
 
 def test_cobertura_reflete_o_inserido(db_session: Session) -> None:
     watch = _watch(db_session)
     a = _listing(db_session, watch, "a")
     _leitura(db_session, a, 10.0, "100.00")
-    _leitura(db_session, a, 9.75, "99.00")  # mesmo dia UTC? 9.75d atras = 06:00 do dia D-10
+    _leitura(db_session, a, 9.75, "99.00")  # 9.75d atras = 06:00 do dia D-10
     _leitura(db_session, a, 4, "98.00")
 
     r = calcular_estatisticas(db_session, watch.id, agora=AGORA)
     c = r.media_30d.cobertura
 
     assert c.janela_dias == 30
+    assert c.semeada is False
     assert c.amostras == 3
     assert c.dias_com_leitura == 2  # 12:00 e 18:00 do mesmo dia, mais outro dia
     assert c.primeira_leitura == AGORA - timedelta(days=10)
@@ -186,7 +272,7 @@ def test_dinheiro_e_decimal_com_duas_casas(db_session: Session) -> None:
     b = _listing(db_session, watch, "b")
     _leitura(db_session, a, 3, "100.00")
     _leitura(db_session, b, 2, "80.01")
-    _leitura(db_session, a, 1, "90.00")  # serie 100, 80.01, 80.01 -> 260.02/3 = 86.6733
+    _leitura(db_session, a, 1, "90.00")  # 100, 80.01, 80.01 por 1d cada -> 86.6733
 
     r = calcular_estatisticas(db_session, watch.id, agora=AGORA)
 
