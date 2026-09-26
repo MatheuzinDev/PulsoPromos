@@ -1,0 +1,3 @@
+{"status": "ok", "preco_vista": "199.90", "preco_parcelado_total": "219.90", "parcelas": 10,
+ "frete": "0.00", "em_estoque": true, "vendedor": {"campo_qualquer": {"a": 1}, "nivel": "x"},
+ "cupom_aplicavel": "PROMO10"}
