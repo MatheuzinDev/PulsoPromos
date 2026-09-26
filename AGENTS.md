@@ -179,7 +179,13 @@ orca orchestration dispatch-show --task <taskId> --preamble --json
 orca orchestration task-update --id <taskId> --status blocked --result '{"reason":"aguardando credencial"}' --json
 ```
 
-Não deixe terminal concluído aberto só para reler saída — use `worker-release` e depois `worker-read`. Se o release retornar `release_pending` ou `release_unknown`, siga a ação de recuperação do recibo; não troque por um `terminal close` genérico. No retry, o posicionamento **não** é herdado: repita `--worktree` e `--agent`.
+**Libere todo worker que terminou.** Cada terminal vivo consome memória e capacidade da máquina, e vários workers esquecidos abertos degradam o desempenho de todo o resto. Assim que você aceitar o `worker_done` e registrar as evidências, rode `worker-release` — a saída continua legível depois, com `worker-read`.
+
+Só use `worker-retain` quando precisar inspecionar o estado vivo do terminal para investigar uma falha, e libere assim que terminar a inspeção. Reter por comodidade é desperdício.
+
+Antes de despachar uma nova leva de workers, confira se não há dispatch antigo ainda ocupando terminal.
+
+Se o release retornar `release_pending` ou `release_unknown`, siga a ação de recuperação do recibo; não troque por um `terminal close` genérico. No retry, o posicionamento **não** é herdado: repita `--worktree` e `--agent`.
 
 `orchestration reset` é global do runtime. Só use ao abandonar o estado de propósito, e nunca com outro coordenador ativo.
 
@@ -223,6 +229,8 @@ Convenção: branch `worker/<task>/<role>`, diretório `.worktrees/<task>-<role>
 
 Ao concluir, o worker reporta: branch, commits, arquivos alterados, testes executados e resultado, riscos pendentes. Remova a worktree só depois de integrar e conferir que nada ficou sem commit.
 
+**Dispatch abandonado deixa worktree órfã.** Depois de um retry ou de uma falha de ambiente, confira se sobrou worktree vazia da tentativa anterior (`orca worktree ps --json`) e remova-a — ela ocupa disco e polui a lista sem conter trabalho nenhum.
+
 ## 8. Validação
 
 "Concluído" não é evidência. Exija: testes passando, build, type-check, lint, diff revisado ou comportamento reproduzido.
@@ -255,6 +263,7 @@ Ações irreversíveis ou de alto impacto exigem validação adicional e, quando
 - [ ] alterações revisadas conforme o risco
 - [ ] integração entre workers verificada
 - [ ] riscos restantes comunicados
+- [ ] todos os workers liberados (`worker-release`) e worktrees já integradas removidas
 
 ## 12. Prioridades
 
