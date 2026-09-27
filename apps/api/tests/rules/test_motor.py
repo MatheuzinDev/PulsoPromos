@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session
 from pulso.adapters.permissoes import Permissoes, RegistroPermissoes
 from pulso.history.service import calcular_estatisticas
 from pulso.models import Candidate, Coupon, Listing, PriceReading, Watch
+from pulso.rules.parametros import FAIXAS_LIMIAR_MINIMO
 from pulso.rules.service import _regra_media, gerar_candidatos, limiar_da_base
 
 AGORA = datetime(2026, 9, 26, 12, 0, tzinfo=UTC)
@@ -199,6 +200,76 @@ def test_minimo_90d_alerta_a_transicao_uma_vez_so(db_session: Session) -> None:
     assert (
         gerar_candidatos(db_session, agora=AGORA + timedelta(days=2), permissoes=liberado()) == []
     )
+
+
+def candidato_minimo(session: Session, base: str, atual: str) -> Candidate | None:
+    """Preco estavel em `base` (media = minimo anterior = base), depois cai para `atual`."""
+    _, listing = relogio(session)
+    historico(session, listing, base, atual, fundo=base)
+    novos = rodar(session)
+    return novos[0] if novos else None
+
+
+def test_fronteiras_das_faixas_do_minimo() -> None:
+    f = FAIXAS_LIMIAR_MINIMO
+    assert limiar_da_base(D("300.00"), f) == D("10")
+    assert limiar_da_base(D("300.01"), f) == D("7.5")
+    assert limiar_da_base(D("1500.00"), f) == D("7.5")
+    assert limiar_da_base(D("1500.01"), f) == D("5")
+
+
+def test_minimo_caro_queda_1_por_cento_passa_o_piso_mas_nao_o_percentual(
+    db_session: Session,
+) -> None:
+    # antes da calibracao isto disparava: economia R$ 30 e nenhum limiar percentual
+    assert candidato_minimo(db_session, "3000.00", "2970.00") is None
+
+
+def test_minimo_caro_queda_5_por_cento_dispara(db_session: Session) -> None:
+    c = candidato_minimo(db_session, "3000.00", "2850.00")
+    assert c is not None and c.regra == "minimo_90d"
+    assert c.queda_percentual == D("5.00") and c.economia_absoluta == D("150.00")
+
+
+def test_minimo_faixa_media_5_por_cento_nao_dispara(db_session: Session) -> None:
+    assert candidato_minimo(db_session, "1000.00", "950.00") is None  # exige 7,5%
+
+
+def test_minimo_faixa_media_12_por_cento_dispara_pelo_minimo(db_session: Session) -> None:
+    c = candidato_minimo(db_session, "1000.00", "880.00")
+    assert c is not None and c.regra == "minimo_90d"  # a media (15%) reprova
+
+
+def test_minimo_base_400_queda_10_por_cento_dispara(db_session: Session) -> None:
+    c = candidato_minimo(db_session, "400.00", "360.00")
+    assert c is not None and c.regra == "minimo_90d" and c.economia_absoluta == D("40.00")
+
+
+def test_minimo_base_400_queda_5_por_cento_falha_percentual_e_piso(db_session: Session) -> None:
+    assert candidato_minimo(db_session, "400.00", "380.00") is None
+
+
+def test_minimo_barato_queda_17_5_dispara(db_session: Session) -> None:
+    c = candidato_minimo(db_session, "200.00", "165.00")
+    assert c is not None and c.regra == "minimo_90d" and c.economia_absoluta == D("35.00")
+
+
+def test_regressao_media_continua_com_as_faixas_antigas(db_session: Session) -> None:
+    c = candidato_media(db_session, "2000.00", "1790.00")
+    assert c is not None and c.regra == "media_30d"
+
+
+def test_regressao_media_reprova_12_por_cento_em_1000(db_session: Session) -> None:
+    _, listing = relogio(db_session)
+    historico(db_session, listing, "1000.00", "880.00")
+    stats = calcular_estatisticas(
+        db_session, db_session.scalars(select(Watch.id)).one(), agora=AGORA
+    )
+    assert _regra_media(stats, D("880.00")) is None  # 12% < 15%, mesmo passando pelo minimo
+
+
+def test_regressao_media_piso_reprova_25_reais_em_100(db_session: Session) -> None:
+    assert candidato_media(db_session, "100.00", "75.00") is None
 
 
 # ---- RF15: preco-alvo e historico ralo --------------------------------------------------

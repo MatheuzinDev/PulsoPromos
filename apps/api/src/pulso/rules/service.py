@@ -6,8 +6,9 @@ os dois sem frete. O frete nao entra na regra, mas vai no candidato (RF19, RF22)
 Regras, avaliadas de forma independente (OR); vence, por relogio, a de maior pontuacao:
 - media_30d: queda >= limiar da faixa (medida pela media) e economia >= piso; exige historico
   nao ralo (cobertura e amostras).
-- minimo_90d: preco ESTRITAMENTE menor que o minimo ANTERIOR a leitura avaliada, com economia
-  >= piso e sem limiar percentual. Dispara na transicao para um novo fundo, nao por estar nele.
+- minimo_90d: preco ESTRITAMENTE menor que o minimo ANTERIOR a leitura avaliada, com queda >=
+  limiar da faixa do minimo (medida pelo minimo anterior) e economia >= piso.
+  Dispara na transicao para um novo fundo, nao por estar nele.
 - preco_alvo: preco <= Watch.preco_alvo; sem limiar, piso nem historico. Queda e economia
   sao medidas contra a media de 30 dias quando ela existe (0 caso contrario).
 """
@@ -27,10 +28,12 @@ from pulso.models import Candidate, Listing, PriceReading, Watch
 from pulso.rules.parametros import (
     AMOSTRAS_MINIMAS_MEDIA,
     COBERTURA_MINIMA_MEDIA,
-    FAIXAS_LIMIAR,
+    FAIXAS_LIMIAR_MEDIA,
+    FAIXAS_LIMIAR_MINIMO,
     JANELA_REPETICAO_HORAS,
     PISO_ECONOMIA,
     QUEDA_ADICIONAL_MINIMA,
+    Faixas,
 )
 from pulso.rules.vendedor import POLITICAS_VENDEDOR, PoliticaVendedor, vendedor_confiavel
 
@@ -47,18 +50,18 @@ class _Disparo:
     minimo_90d: Decimal | None
 
 
-def limiar_da_base(base: Decimal) -> Decimal:
-    """Queda minima (%) exigida para a faixa da BASE."""
-    for teto, limiar in FAIXAS_LIMIAR:
+def limiar_da_base(base: Decimal, faixas: Faixas = FAIXAS_LIMIAR_MEDIA) -> Decimal:
+    """Queda minima (%) exigida para a faixa da BASE (por padrao, as da regra da media)."""
+    for teto, limiar in faixas:
         if teto is None or base <= teto:
             return limiar
-    raise AssertionError("FAIXAS_LIMIAR precisa terminar em faixa sem teto")
+    raise AssertionError("as faixas precisam terminar em faixa sem teto")
 
 
-def _queda_suficiente(base: Decimal, preco: Decimal) -> bool:
+def _queda_suficiente(base: Decimal, preco: Decimal, faixas: Faixas = FAIXAS_LIMIAR_MEDIA) -> bool:
     # (base - preco) / base * 100 >= limiar, sem divisao para nao arredondar na fronteira
     economia = base - preco
-    return economia >= PISO_ECONOMIA and economia * _CEM >= limiar_da_base(base) * base
+    return economia >= PISO_ECONOMIA and economia * _CEM >= limiar_da_base(base, faixas) * base
 
 
 def _medidas(base: Decimal | None, preco: Decimal) -> tuple[Decimal, Decimal]:
@@ -92,7 +95,9 @@ def _regra_minimo(
     primeira = anterior.cobertura.primeira_leitura
     if primeira is None or anterior.ocorrido_em < primeira:
         return None
-    if preco >= anterior.preco or anterior.preco - preco < PISO_ECONOMIA:
+    if preco >= anterior.preco or not _queda_suficiente(
+        anterior.preco, preco, FAIXAS_LIMIAR_MINIMO
+    ):
         return None
     # transicao alertada uma vez so: a leitura e um log de mudancas e pode ficar "atual" por dias
     ja_alertada = session.scalar(
