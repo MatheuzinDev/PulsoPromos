@@ -209,11 +209,7 @@ def test_server_defaults_aplicados_no_nivel_do_banco(db_session: Session) -> Non
     )
     db_session.commit()
 
-    reading = (
-        db_session.query(PriceReading)
-        .filter_by(listing_id=listing.id)
-        .one()
-    )
+    reading = db_session.query(PriceReading).filter_by(listing_id=listing.id).one()
     assert reading.moeda == "BRL"
     assert reading.desatualizado is False
 
