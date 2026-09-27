@@ -8,6 +8,8 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
 
     database_url: str = "postgresql+psycopg://pulso:pulso@localhost:5432/pulso"
+    # Banco dos testes; se vazio, usa o nome do banco de desenvolvimento + "_test".
+    test_database_url: str | None = None
     environment: str = "development"
 
     # Intervalo de coleta por marketplace, em minutos (RF09; defaults dentro do RNF05: 30 a 60).
