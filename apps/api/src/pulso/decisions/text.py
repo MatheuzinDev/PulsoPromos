@@ -73,7 +73,7 @@ def _linha_cabecalho(watch: Watch) -> str:
 
 
 def _linha_preco(candidate: Candidate) -> str:
-    return f"{_formatar_dinheiro(candidate.preco_vista)} a vista"
+    return f"{_formatar_dinheiro(candidate.preco_vista)} à vista"
 
 
 def _linha_comparacao_media(candidate: Candidate) -> str | None:
@@ -88,7 +88,7 @@ def _linha_comparacao_media(candidate: Candidate) -> str | None:
         return None
     percentual = (media - candidate.preco_vista) / media * _CEM
     percentual_inteiro = percentual.quantize(Decimal("1"), rounding=ROUND_HALF_UP)
-    return f"{percentual_inteiro}% abaixo da media de 30 dias ({_formatar_dinheiro(media)})"
+    return f"{percentual_inteiro}% abaixo da média de 30 dias ({_formatar_dinheiro(media)})"
 
 
 def _linha_cupom(coupon: Coupon, desconto: Decimal) -> str:
@@ -127,7 +127,7 @@ def compor_texto(
     if comparacao is not None:
         linhas.append(comparacao)
     if candidate.regra == "minimo_90d":
-        linhas.append("Menor preco em 90 dias")
+        linhas.append("Menor preço em 90 dias")
 
     linhas.append("")
 

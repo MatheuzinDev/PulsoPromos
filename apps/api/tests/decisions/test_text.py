@@ -74,8 +74,8 @@ def test_texto_completo_escrito_a_mao_linha_por_linha() -> None:
     esperado = (
         "⌚ Seiko SNK809 — Automático, 37mm\n"
         "\n"
-        "R$ 155,00 a vista\n"
-        "18% abaixo da media de 30 dias (R$ 190,00)\n"
+        "R$ 155,00 à vista\n"
+        "18% abaixo da média de 30 dias (R$ 190,00)\n"
         "\n"
         "🎟️ Cupom PROMO10 (-R$ 10,00)\n"
         "🏪 Loja Oficial Seiko - Shopee\n"
@@ -100,13 +100,13 @@ def test_sem_cupom_aplicado_linha_de_cupom_some_sem_deixar_branco_sobrando() -> 
 def test_regra_media_30d_nao_mostra_menor_preco_em_90_dias() -> None:
     c = candidate(regra="media_30d")
     texto = compor_texto(c, watch(), listing(), None, loja="Loja Oficial Seiko")
-    assert "Menor preco em 90 dias" not in texto
+    assert "Menor preço em 90 dias" not in texto
 
 
 def test_regra_minimo_90d_mostra_menor_preco_em_90_dias() -> None:
     c = candidate(regra="minimo_90d", minimo_90d=D("150.00"))
     texto = compor_texto(c, watch(), listing(), None, loja="Loja Oficial Seiko")
-    assert "Menor preco em 90 dias" in texto
+    assert "Menor preço em 90 dias" in texto
 
 
 def test_frete_desconhecido() -> None:
@@ -125,13 +125,13 @@ def test_frete_conhecido_mostra_valor_formatado() -> None:
 def test_dinheiro_formatado_em_pt_br_milhar_e_decimal() -> None:
     c = candidate(preco_vista=D("1234.50"), media_30d=None)
     texto = compor_texto(c, watch(), listing(), None, loja="Loja Oficial Seiko")
-    assert "R$ 1.234,50 a vista" in texto
+    assert "R$ 1.234,50 à vista" in texto
 
 
 def test_comparacao_com_media_so_aparece_quando_media_30d_existe() -> None:
     c = candidate(media_30d=None)
     texto = compor_texto(c, watch(), listing(), None, loja="Loja Oficial Seiko")
-    assert "abaixo da media" not in texto
+    assert "abaixo da média" not in texto
 
 
 def test_comparacao_some_quando_preco_nao_esta_abaixo_da_media() -> None:
@@ -139,7 +139,7 @@ def test_comparacao_some_quando_preco_nao_esta_abaixo_da_media() -> None:
     rules/service.py); mostrar "0% abaixo" ou um percentual negativo seria enganoso."""
     c = candidate(regra="preco_alvo", media_30d=D("100.00"), preco_vista=D("120.00"))
     texto = compor_texto(c, watch(), listing(), None, loja="Loja Oficial Seiko")
-    assert "abaixo da media" not in texto
+    assert "abaixo da média" not in texto
 
 
 def test_texto_nao_tem_aviso_de_afiliado_nem_carimbo_de_data_hora() -> None:
