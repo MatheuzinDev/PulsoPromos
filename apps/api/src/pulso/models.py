@@ -156,6 +156,8 @@ class Publication(TimestampMixin, Base):
     preco_efetivo: Mapped[Decimal] = mapped_column(Numeric(12, 2), nullable=False)
     loja: Mapped[str] = mapped_column(String(60), nullable=False)
     link_publicado: Mapped[str] = mapped_column(Text, nullable=False)
+    texto_publicado: Mapped[str] = mapped_column(Text, nullable=False)
+    texto_editado: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
     telegram_message_id: Mapped[int | None] = mapped_column(BigInteger, nullable=True)
     encerrada_em: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
