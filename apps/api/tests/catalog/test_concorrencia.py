@@ -90,6 +90,7 @@ def _publicacao(watch_id: int, listing_id: int) -> Publication:
         preco_efetivo=Decimal("90.00"),
         loja="Loja",
         link_publicado="http://x/1",
+        texto_publicado="texto de teste",
     )
 
 

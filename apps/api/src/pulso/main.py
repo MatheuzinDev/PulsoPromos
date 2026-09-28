@@ -4,12 +4,14 @@ from pulso.catalog.errors import register_exception_handlers
 from pulso.catalog.router import listings_router
 from pulso.catalog.router import router as catalog_router
 from pulso.coupons.router import router as coupons_router
+from pulso.decisions.router import router as decisions_router
 
 app = FastAPI(title="Pulso Promos API")
 register_exception_handlers(app)
 app.include_router(catalog_router)
 app.include_router(listings_router)
 app.include_router(coupons_router)
+app.include_router(decisions_router)
 
 
 @app.get("/health")

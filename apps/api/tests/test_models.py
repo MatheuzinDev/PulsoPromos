@@ -56,6 +56,7 @@ def test_criar_watch_listing_price_reading_publication_e_ler_de_volta(
         preco_efetivo=Decimal("849.90"),
         loja="Shopee",
         link_publicado="https://shopee.com.br/item-full-flow?aff=1",
+        texto_publicado="texto de teste",
     )
     db_session.add(publication)
     db_session.commit()
